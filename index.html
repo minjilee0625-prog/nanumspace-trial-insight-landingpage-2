@@ -51,7 +51,7 @@ html { scrollbar-color: #A8BCC8 transparent; scrollbar-width: thin; }
   --font: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
 }
 
-html { scroll-behavior: smooth; background: #080f1e; }
+html { scroll-behavior: smooth; background: #080f1e; scroll-snap-type: y mandatory; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -63,11 +63,18 @@ body {
 
 /* ─── NAV ─────────────────────────────────── */
 nav {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 1.1rem clamp(1.5rem, 5vw, 4rem) 1.1rem calc(clamp(1.5rem, 5vw, 4rem) + 6.5rem);
   background: transparent;
   border-bottom: none;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease;
+}
+nav.nav-scrolled {
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(20,50,100,0.06);
 }
 .nav-brand {
   display: flex; align-items: center; gap: 0.65rem;
@@ -84,8 +91,12 @@ nav {
 .nav-wordmark b { color: #4BA3DE; font-weight: 800; }
 .nav-links { display: flex; align-items: center; gap: 1.75rem; list-style: none; margin-right: 24rem; margin-top: 0; }
 .nav-links a { color: #7299B8; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s, background 0.2s, border-color 0.2s; padding: 0.5rem 1.1rem; border-radius: 6px; border: 1px solid transparent; }
-.nav-links a:hover { color: #F4F8FC; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.07); }
-.nav-links a:active { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.13); }
+nav.nav-scrolled:not(.nav-light-theme) .nav-links a { color: rgba(255,255,255,0.85); }
+.nav-links a:hover { color: #F4F8FC; background: rgba(255,255,255,0.18); }
+.nav-links a:active { background: rgba(255,255,255,0.26); }
+nav.nav-light-theme .nav-links a { color: #4A6580; }
+nav.nav-light-theme .nav-links a:hover { color: #123a7a; background: rgba(31,104,176,0.08); }
+nav.nav-light-theme .nav-links a:active { background: rgba(31,104,176,0.14); }
 .nav-cta {
   background: var(--cerulean); color: #fff !important;
   padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600 !important;
@@ -96,47 +107,27 @@ nav {
 /* ─── HERO ─────────────────────────────────── */
 .hero {
   position: relative; height: 100vh;
-  display: flex; align-items: flex-start;
+  display: flex; align-items: center;
   overflow: hidden;
-  background: linear-gradient(180deg, #10131f 0%, #131c40 20%, #123a7a 50%, #1f5fd6 78%, #8ec2f5 100%);
+  background: linear-gradient(to bottom, #080f1e 0%, #112147 30%, #2d5f8a 100%);
   padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 5vw, 4rem) clamp(5rem, 9vw, 8rem);
+  scroll-snap-align: start;
 }
 .hero-inner {
   position: relative; z-index: 2;
-  width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3rem;
+  width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3rem;
   margin-top: 0;
 }
-/* ─── 움직이는 하늘·파랑 그라데이션 메시 ───────────────── */
-.hero-mesh { position: absolute; inset: 0; overflow: hidden; z-index: 0; isolation: isolate; }
-.hero-mesh-blob {
-  position: absolute; border-radius: 50%;
-  filter: blur(70px);
-  mix-blend-mode: screen;
-  will-change: transform;
+#hero-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
 }
-.hero-mesh-blob.b1 {
-  width: 52vw; height: 52vw; top: -18%; left: -12%;
-  background: radial-gradient(circle, rgba(150,205,255,0.4) 0%, rgba(150,205,255,0) 70%);
+#geo-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
 }
-.hero-mesh-blob.b2 {
-  width: 46vw; height: 46vw; top: 4%; right: -14%;
-  background: radial-gradient(circle, rgba(70,150,235,0.5) 0%, rgba(70,150,235,0) 70%);
-}
-.hero-mesh-blob.b3 {
-  width: 40vw; height: 40vw; bottom: -16%; left: 18%;
-  background: radial-gradient(circle, rgba(120,190,245,0.45) 0%, rgba(120,190,245,0) 70%);
-}
-.hero-mesh-blob.b4 {
-  width: 34vw; height: 34vw; bottom: 6%; right: 10%;
-  background: radial-gradient(circle, rgba(100,220,255,0.4) 0%, rgba(100,220,255,0) 70%);
-}
-@keyframes meshFloat1 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(6%,8%) scale(1.12); } }
-@keyframes meshFloat2 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-7%,6%) scale(1.08); } }
-@keyframes meshFloat3 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(5%,-7%) scale(1.1); } }
-@keyframes meshFloat4 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-6%,-5%) scale(1.14); } }
 .hero-glow {
   position: absolute; top: -20%; left: 40%; width: 60%; height: 80%;
-  background: radial-gradient(ellipse at center, rgba(75,163,222,0.16) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(37,112,181,0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 /* ─── GLASS SHAPES ───────────────────────────────── */
@@ -155,6 +146,7 @@ nav {
   --g-rot: 0deg; --g-y: -18px;
 }
 .hg-show-sm { display: none; }
+.m-eyebrow-br { display: none; }
 .hg-sphere {
   border-radius: 50%;
   background: radial-gradient(circle at 30% 28%, rgba(190,220,255,0.58) 0%, rgba(100,155,255,0.40) 38%, rgba(155,115,255,0.26) 72%, rgba(90,145,255,0.10) 100%);
@@ -166,19 +158,56 @@ nav {
   border: 11px solid rgba(110,170,255,0.60);
   box-shadow: 0 0 0 1px rgba(150,195,255,0.28), inset 0 0 10px rgba(130,185,255,0.46), 0 8px 24px rgba(80,140,255,0.34);
 }
+.hg-capsule {
+  border-radius: 999px;
+  background: linear-gradient(130deg, rgba(145,195,255,0.52) 0%, rgba(105,160,255,0.40) 45%, rgba(175,135,255,0.28) 100%);
+  border: 1px solid rgba(120,185,255,0.62);
+  box-shadow: inset 1px 3px 8px rgba(185,215,255,0.28), 0 8px 22px rgba(80,145,255,0.26);
+}
+.hg-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: linear-gradient(168deg, rgba(155,200,255,0.62) 0%, rgba(105,162,255,0.46) 48%, rgba(175,135,255,0.32) 100%);
+}
+.hg-gem {
+  clip-path: polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%);
+  background: linear-gradient(148deg, rgba(160,210,255,0.58) 0%, rgba(105,165,255,0.42) 42%, rgba(185,145,255,0.28) 100%);
+}
 .hg-chrome svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 14px 26px rgba(20,50,150,0.35)); }
 .hero-inner { position: relative; z-index: 3; }
 
-.hero-content { width: auto; align-self: flex-start; text-align: left; margin-top: 1rem; margin-left: 13rem; position: relative; top: 10rem; }
+.hero-content { width: 100%; text-align: center; padding-left: 0; margin-top: -0.5rem; position: relative; top: clamp(7rem, calc(8rem - 1vw), 7.5rem); }
+.hero-logo-right { flex-shrink: 0; display: flex; align-items: center; justify-content: center; transform: none; margin-top: 1.3rem; }
+/* 두 텍스트를 같은 자리에 겹쳐 표시하는 슬롯 — sub-overlay는 absolute로 레이아웃 분리 */
+.hero-eyebrow-slot {
+  position: relative;
+  top: clamp(1.7rem, calc(4.3rem - 2.6vw), 3rem);
+  margin-top: clamp(4rem, calc(3.5rem + 1vw), 4.5rem);
+  margin-bottom: -2rem;
+  display: flex;
+  justify-content: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-size: clamp(19px, calc(8px + 1.375vw), 30px); font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: #4BA3DE; white-space: normal; word-break: keep-all; text-align: center;
+}
+@keyframes heroEyebrowLifecycle {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  82%  { opacity: 1; }
+  90%  { opacity: 0; }
+  100% { opacity: 0; }
+}
 @keyframes heroSubIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+.hero-eyebrow::before { display: none; }
 .hero-headline {
-  font-size: clamp(2.5rem, 6.5vw, 65px); font-weight: 700;
-  line-height: 1.35; letter-spacing: 0.01em;
+  font-size: clamp(2rem, 4.125vw, 65px); font-weight: 700;
+  line-height: 1.2; letter-spacing: 0.01em;
   color: #F4F8FC; margin-bottom: 0.75rem;
-  text-align: left; width: 100%;
+  text-align: center; width: 100%;
 }
 .hero-headline em { font-style: normal; color: #4BA3DE; font-weight: 800; font-family: 'KBLJumpCondensed', sans-serif; font-size: 0.97em; display: inline-block; transform: skewX(-10deg); position: relative; left: -0.4rem; }
 .hero-line1 { display: block; white-space: nowrap; margin-bottom: 0.25em; }
@@ -187,41 +216,37 @@ nav {
   font-family: 'KBLJumpCondensed', sans-serif;
   font-weight: 800;
   display: inline-block;
-  transform: skewX(-10deg);
   color: #ffffff;
   font-size: 1.15em;
   letter-spacing: 0.02em;
 }
 /* ─── PAGE LOAD ENTRANCE ANIMATIONS ──────────── */
-/* 순서: 1.아이브로우(등장 후 소멸) → 2.헤더타이틀 → 3.서브텍스트 → 4.로고 이미지 */
+/* 순서: 1.아이브로우 → 2.헤더타이틀 → 3.서브텍스트 → 4.로고 이미지 */
 @keyframes heroEnterFade {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 /* nav 페이드인 제거 */
-/* 1. 아이브로우: heroEyebrowLifecycle delay 0.7s, 5.6s 동안 등장 후 소멸 */
-/* 2. 헤더 타이틀: 아이브로우가 완전히 사라진 뒤 등장 */
-/* 4. 로고 이미지 */
-/* 헤더 타이틀 바로 아래 나타나는 작은 서브텍스트 */
+/* 아이브로우 자리에 겹쳐 나타나는 서브텍스트 */
 .hero-sub-overlay {
-  text-align: left;
-  white-space: normal;
-  word-break: keep-all;
-  margin: 0.75rem 0 0;
-  opacity: 0;
-  font-size: 30px;
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 0.5rem);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+  font-size: clamp(19px, calc(8px + 1.375vw), 30px);
   font-weight: 700;
   letter-spacing: 0.13em;
-  color: #6FD0FF;
+  color: #4BA3DE;
   line-height: 1.65;
-  animation: heroSubIn 1s ease both;
-  animation-delay: 0.7s;
+  animation: heroSubIn 1.8s ease both;
+  animation-delay: 0.6s;
 }
 .hero-sub-overlay .hero-sub-insight {
   font-size: 1em;
-  transform: none;
-  position: relative;
-  top: -0.08em;
+  margin-right: 0.3em;
 }
 .hero-tagline {
   font-size: clamp(1.05rem, 2vw, 1.2rem); font-weight: 600;
@@ -286,18 +311,25 @@ nav {
 /* ─── SECTION BASE ─────────────────────────────────── */
 .section { padding: clamp(6rem, 10vw, 9rem) clamp(1.5rem, 5vw, 4rem); }
 .mobile-br { display: none; }
+.feat1-br-mobile { display: none; }
+.feat2-br-mobile { display: none; }
 .s-eyebrow {
   display: inline-block;
-  font-size: 1.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 1.3rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--cerulean); margin-bottom: 1.7rem;
   background: none; border-radius: 0;
   padding: 0.4rem 0;
 }
 .why-section .s-eyebrow { margin-top: 2rem; transform: translateY(1rem); }
 .s-title {
-  font-size: 50px; font-weight: 800;
+  font-size: 36px; font-weight: 800;
   letter-spacing: 0.05em; line-height: 1.2; text-wrap: balance;
   color: #1B3A6B; margin-bottom: 1.7rem;
+}
+/* 피처 섹션 헤더(KEY FEATURES/핵심 기능)는 이전 크기 유지 — 이번 축소 대상에서 제외 (데스크탑만, 모바일은 섹션2와 동일하게 축소) */
+@media (min-width: 801px) {
+  #features .s-eyebrow { font-size: 1.5rem !important; }
+  #features .s-title { font-size: 42px !important; }
 }
 .s-desc {
   font-size: 25px; font-weight: 700; color: var(--text-muted);
@@ -308,7 +340,9 @@ nav {
 .why-section {
   background: radial-gradient(ellipse 100% 15% at 50% 0%, rgba(0,185,255,0.12) 0%, transparent 100%), linear-gradient(145deg, #EBF4FF 0%, #F6FAFF 55%, #FAFCFF 100%);
   text-align: center; position: relative; overflow: hidden;
-  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  box-sizing: border-box;
+  min-height: 100vh; padding-top: 80px; display: flex; flex-direction: column; justify-content: center;
+  scroll-snap-align: start;
 }
 .why-section::before, .why-section::after { display: none; }
 .why-intro { max-width: 780px; margin: 0 auto 3.5rem; position: relative; z-index: 1; }
@@ -358,39 +392,51 @@ nav {
 /* ─── BENEFITS OVERVIEW ─────────────────────────────────── */
 .benefits-section {
   background: #FFFFFF;
-  text-align: center; position: relative; overflow: hidden;
+  text-align: left; position: relative; overflow: hidden;
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  scroll-snap-align: start;
 }
 .benefits-section::before, .benefits-section::after { display: none; }
-.benefits-intro { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
-.benefits-intro .s-desc { margin: 0 auto; max-width: none; }
+.benefits-intro { max-width: 1200px; width: 100%; margin: 0 auto; position: relative; z-index: 1; text-align: center; }
+.benefits-intro .s-desc { margin: 1rem auto 0; max-width: none; text-align: center; }
 .benefits-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem; margin-top: 3rem; position: relative; z-index: 1;
-  max-width: 760px; margin-left: auto; margin-right: auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 3rem; margin-top: 6.5rem; position: relative; z-index: 1;
+  width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto;
+  box-sizing: border-box;
 }
 .benefit-card {
-  padding: 2.25rem 1.875rem; border-radius: 20px;
-  border: none; background: #FFFFFF;
-  box-shadow: 0 4px 24px rgba(10,40,100,0.07);
-  transition: box-shadow 0.25s, transform 0.25s; text-align: center;
+  padding: 0; border-radius: 0;
+  border: none; background: transparent;
+  box-shadow: none;
+  position: relative;
+  transition: transform 0.25s; text-align: left;
 }
-.benefit-card:hover { box-shadow: 0 12px 36px rgba(10,40,100,0.13); transform: translateY(-5px); }
+.benefit-card:not(:first-child)::before {
+  content: ''; position: absolute; left: -1.5rem; top: 0; bottom: 0;
+  width: 1px; background: rgba(30,100,170,0.15);
+}
+.benefit-card:hover { transform: translateY(-3px); }
 .benefit-card:hover .benefit-icon-img { transform: translateY(-6px) scale(1.08); filter: drop-shadow(0 8px 12px rgba(31,104,176,0.25)); }
 .benefit-icon-img.flipped { transform: scaleX(-1); }
 .benefit-card:hover .benefit-icon-img.flipped { transform: scaleX(-1) translateY(-6px) scale(1.08); filter: drop-shadow(0 8px 12px rgba(31,104,176,0.25)); }
 .benefit-icon-wrap {
-  width: 48px; height: 48px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--cerulean); margin: 0 auto 1.25rem;
-  background: linear-gradient(135deg, rgba(31,104,176,0.13), rgba(58,144,204,0.06));
+  width: 48px; height: 48px; border-radius: 0;
+  display: flex; align-items: flex-start; justify-content: flex-start;
+  color: var(--cerulean); margin: 0 0 1.5rem;
+  background: none;
 }
-.benefit-title { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 1.7rem; }
-.benefit-desc { font-size: 1rem; font-weight: 500; color: var(--text-muted); line-height: 1.5; margin-top: -1.2rem; }
+.benefit-title { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
+.benefit-desc { font-size: 1.1rem; font-weight: 500; color: var(--text-muted); line-height: 1.6; margin-top: 0; }
 
 /* ─── FEATURES ─────────────────────────────────── */
 .features-section {
   background: linear-gradient(165deg, #E9EFF8 0%, #F2F7FC 55%, #F9FAFB 100%);
   position: relative;
+  overflow: hidden;
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  box-sizing: border-box;
+  scroll-snap-align: start;
 }
 .features-section::before {
   content: ''; position: absolute;
@@ -406,55 +452,93 @@ nav {
 }
 .features-grid-2col {
   display: flex; flex-direction: column;
-  max-width: 1300px; margin: 0 auto; padding: 0 4rem;
+  width: 100%; max-width: 1300px; margin: 0 auto; padding: 0 4rem;
+  box-sizing: border-box;
 }
 .feature-block {
-  display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-  min-height: 100vh;
-  gap: 4rem; padding: 5.5rem 0;
+  display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
+  min-height: 72vh;
+  gap: 1rem; padding: 1rem 0 1rem 3.5rem;
   border-bottom: 1px solid rgba(30,100,170,0.06);
   position: relative; z-index: 1;
   width: 100%;
 }
 .feature-block:last-child { border-bottom: none; }
-/* ─── FEATURE DOTS NAV (fullPage.js 스타일) ───────────── */
-.feature-dots {
-  position: fixed; left: auto; right: 0.75rem; top: 50%; transform: translateY(-50%);
-  width: auto;
-  display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+/* 섹션3 상단 공통 타이틀 제거 — 각 피처 카피 위 순번 라벨로 대체 */
+.features-header { display: none !important; }
+/* ─── FEATURE 가로 캐러셀 (모바일 포함 전체 폭) ───── */
+.features-grid-2col { position: relative; overflow: hidden; min-height: 72vh; display: block; }
+.feature-block {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  border-bottom: none !important;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.features-scroll-hint {
+  position: fixed; left: 50%; bottom: 1.75rem; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  color: rgba(31,104,176,0.4); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em;
   z-index: 50; opacity: 0; pointer-events: none;
   transition: opacity 0.35s ease;
+  animation: featScrollHintBounce 1.8s ease-in-out infinite;
 }
-.feature-dots.is-visible { opacity: 1; pointer-events: auto; }
-.feature-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: rgba(30,100,170,0.22);
-  border: 2px solid transparent;
-  cursor: pointer; padding: 0; display: block;
-  transition: background 0.3s, transform 0.3s, border-color 0.3s;
+.features-scroll-hint.is-visible { opacity: 1; }
+@keyframes featScrollHintBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
 }
-.feature-dot:hover { background: rgba(30,100,170,0.45); }
-.feature-dot.active {
-  background: #1F68B0; border-color: rgba(31,104,176,0.25);
-  transform: scale(1.5);
+.feature-pager {
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
 }
+.feature-pager.is-visible { opacity: 1; pointer-events: auto; }
+.feat-pager-arrow {
+  position: absolute; top: calc(50% - 1rem); transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(31,104,176,0.55);
+  padding: 0.5rem 0.75rem;
+  z-index: 50;
+  transition: color 0.2s, opacity 0.2s;
+}
+.feat-pager-arrow svg { display: block; }
+.feat-pager-prev { left: 7.5rem; }
+.feat-pager-next { right: 7.5rem; }
+.feat-pager-arrow:hover { color: #123a7a; }
+.feat-pager-arrow:disabled { opacity: 0.3; cursor: default; color: #1F68B0; }
+.feat-pager-count {
+  position: absolute; left: 50%; bottom: 10rem; transform: translateX(-50%);
+  font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; color: #4A6580;
+  font-variant-numeric: tabular-nums;
+  z-index: 50;
+}
+.feat-pager-current { color: #1F68B0; font-weight: 800; }
 @media (max-width: 1000px) {
-  .feature-dots { display: none; }
+  .features-grid-2col { top: 1.5rem !important; }
+  .feat-pager-arrow { padding: 0.3rem 0.35rem; top: calc(50% + 1rem); }
+  .feat-pager-arrow svg { width: 14px; height: 26px; }
+  .feat-pager-prev { left: 0.5rem; }
+  .feat-pager-next { right: 0.5rem; }
+  .feat-pager-count { bottom: 3rem; font-size: 0.9rem; }
 }
-.feat-copy { flex: 1; min-width: 0; padding: 0 0 1rem; }
-.feat-right { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+.feat-copy { flex: 0 1 auto; max-width: 560px; min-width: 0; padding: 0 0 1rem; margin-left: 3rem; }
+.feat-right { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+.feat-index {
+  display: block; font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.08em; color: var(--text-muted);
+  opacity: 0.6; margin-bottom: 0.6rem;
+}
 .feat-tag {
-  display: inline-block; font-size: 28px; font-weight: 700;
+  display: inline-block; font-size: 17px; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--cerulean); background: none;
   padding: 0; border-radius: 0; margin-bottom: 0.35rem;
 }
 .feat-title {
-  font-size: 50px; font-weight: 800;
+  font-size: 30px; font-weight: 800;
   color: var(--text); letter-spacing: 0.05em;
   margin-bottom: 1.7rem; line-height: 1.2; text-wrap: balance;
 }
-.feat-desc { font-size: 25px; font-weight: 700; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.375rem; margin-top: 1.7rem; }
+.feat-desc { font-size: 19px; font-weight: 500; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.375rem; margin-top: 1.7rem; }
 .feat-note {
   font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;
   padding: 0.5rem 0; margin-bottom: 1.5rem;
@@ -465,6 +549,7 @@ nav {
   font-size: 0.875rem; padding: 0.3rem 0.9rem; border-radius: 20px;
   background: #D0E6F5;
   color: var(--sky-dark); font-weight: 600;
+  line-height: 1.3; display: inline-block;
 }
 
 /* ─── VISUAL MOCKUPS ─────────────────────────────────── */
@@ -473,7 +558,7 @@ nav {
   border-radius: 22px; overflow: hidden;
   box-shadow: 0 16px 60px rgba(10,40,100,0.07);
 }
-.feat-sub { margin-top: 0.25rem; grid-column: 1; }
+.feat-sub { margin-top: 0.25rem; grid-column: 1; align-self: center; }
 .feat-visual { }
 .mock-titlebar {
   display: flex; align-items: center; gap: 0.45rem;
@@ -616,7 +701,7 @@ nav {
 /* ─── FOOTER ─────────────────────────────────── */
 footer {
   background: var(--text);
-  padding: 3rem 2.5rem 3rem 2rem;
+  padding: 2rem 2.5rem 2rem 2rem;
   display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2rem;
 }
 .footer-brand { font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.6); margin: 0; padding: 0; line-height: 1; }
@@ -634,34 +719,39 @@ footer {
 .fade-in { opacity: 0; transform: translateY(18px); transition: opacity 1.2s ease, transform 1.2s ease; }
 .fade-in.vis { opacity: 1; transform: none; }
 .why-section .fade-in { transition-duration: 1.5s; }
-#faq .fade-in { transition-duration: 1.4s; }
+#faq .fade-in { transition-duration: 0.35s; }
 
 /* ─── RESPONSIVE ─────────────────────────────────── */
 
 @media (min-width: 1600px) {
-  .nav-brand { margin-left: 10rem; }
+  .nav-brand { margin-left: 16rem; }
 }
 
-@media (max-width: 1599px) {
+@media (min-width: 1367px) and (max-width: 1599px) {
   .nav-links { margin-right: 11rem !important; }
   .hero-inner { margin-top: 0; }
+  .hero-eyebrow-slot { margin-top: 4rem !important; margin-bottom: -1.5rem !important; }
+  .hero-eyebrow { font-size: 24px !important; }
   .hero-sub-overlay { font-size: 24px !important; }
   .hero-headline { font-size: clamp(2rem, 5vw, 52px) !important; }
-  .hero-content { margin-top: 1rem !important; }
+  .hero-content { margin-top: 0 !important; top: 8.0rem !important; }
+  .hero-logo-right { margin-top: -2.5rem !important; }
+  .hero-logo-right img { width: 480px !important; }
   .hero-arrow { bottom: 2rem !important; }
 }
 
 @media (max-width: 1366px) {
   .hero-glass-wrap { transform: scale(0.85); }
   .hero-inner { margin-top: 0; }
-  .hero-sub-overlay { font-size: 22px !important; }
-  .hero-headline { font-size: clamp(1.8rem, 4.5vw, 46px) !important; }
-  .hero-content { margin-top: 1rem !important; top: 0 !important; }
+  .nav-links { margin-right: 11rem !important; }
+  .hero-content { margin-top: 0 !important; }
+  .hero-logo-right { margin-top: 1.3rem !important; }
+  .hero-logo-right img { width: 540px !important; }
   .hero-arrow { bottom: 1.5rem !important; }
 
   /* 섹션 3 — 태블릿 포함 1열 세로 배치 */
   .features-grid-2col { display: flex !important; flex-direction: column !important; padding: 0 2rem !important; gap: 0 !important; }
-  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1.5rem !important; padding: 3rem 0 !important; border-bottom: 1px solid rgba(30,100,170,0.1) !important; width: 100% !important; box-sizing: border-box !important; }
+  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1.5rem !important; padding: 3rem 0 !important; border-bottom: none !important; width: 100% !important; box-sizing: border-box !important; }
   .feature-block:last-child { border-bottom: none !important; }
   .feat-visual { width: 100% !important; max-width: 480px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; }
   .feat-icon-pair { flex-direction: row !important; align-items: center !important; justify-content: center !important; }
@@ -669,7 +759,6 @@ footer {
   .feat-icon-arrow { transform: rotate(0deg) !important; }
   .chat-a { max-width: 100% !important; }
   .fade-in.features-header { padding-top: 2rem !important; margin-bottom: 3rem !important; min-height: unset !important; }
-  .fade-in.features-header img { height: 200px !important; }
 
   /* 태블릿 — 텍스트 전체 가운데 정렬 */
   .feature-block { align-items: center !important; }
@@ -690,9 +779,10 @@ footer {
   .hg-hide-md { display: none; }
   .hg-show-sm { display: block !important; }
   .hero-inner { align-items: center; }
-  .hero-sub-overlay { font-size: 19px !important; }
-  .hero-content { width: auto !important; align-self: flex-start !important; padding-left: 0; margin-left: 1.5rem; text-align: left; margin-top: 1rem !important; top: 0 !important; }
-  .hero-headline { font-size: clamp(1.8rem, 4vw, 2.4rem) !important; text-align: left; }
+  .hero-content { padding-left: 0; text-align: center; margin-top: 0 !important; }
+  .hero-headline { text-align: center; }
+  .hero-logo-right { margin-top: 1.3rem !important; }
+  .hero-logo-right img { width: 540px !important; }
   .s-title { font-size: clamp(1.8rem, 4vw, 2.6rem) !important; }
   .feat-tag { font-size: 18px !important; }
   .feat-title { font-size: clamp(1.5rem, 3.5vw, 2rem) !important; white-space: normal !important; }
@@ -703,7 +793,7 @@ footer {
 
   /* 피처 섹션 */
   .features-grid-2col { display: flex !important; flex-direction: column !important; padding: 0 1.5rem !important; gap: 0 !important; }
-  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1rem !important; padding: 2.5rem 0 !important; border-bottom: 1px solid rgba(30,100,170,0.1) !important; width: 100% !important; box-sizing: border-box !important; }
+  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1rem !important; padding: 2.5rem 0 !important; border-bottom: none !important; width: 100% !important; box-sizing: border-box !important; }
   .feature-block:last-child { border-bottom: none !important; }
   .feat-visual { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
   /* Feature1: 이미지 2개 가로 나란히 */
@@ -714,48 +804,48 @@ footer {
   .chat-a { max-width: 100% !important; }
 
   .fade-in.features-header { padding-top: 2rem !important; margin-bottom: 3rem !important; min-height: unset !important; }
-  .fade-in.features-header img { height: 180px !important; margin-top: 1rem !important; }
 }
 
 @media (max-width: 900px) {
   .hero-line1, .hero-line2 { display: block !important; white-space: nowrap !important; }
-  .hero-headline { font-size: clamp(14px, 4.5vw, 65px) !important; text-align: left !important; }
+  .hero-headline { font-size: clamp(14px, 4.5vw, 65px) !important; text-align: center !important; }
   .mobile-break { display: block; }
 }
 
 @media (max-width: 800px) {
+  html { scroll-snap-type: none !important; }
   .hero-glass-wrap { transform: scale(0.42); }
   .hg-hide-sm { display: none; }
   .hg-show-sm.hg-hide-sm { display: none !important; }
   .hero-glass { box-shadow: none !important; }
-  .hero-monitor-img { width: 480px !important; max-width: 62vw !important; bottom: 8% !important; right: 1% !important; }
-  .hg-sp1 { width: 320px !important; height: 320px !important; bottom: -15% !important; left: -15% !important; transform: none !important; }
-  .hg-sp2 { width: 150px !important; height: 150px !important; bottom: 5% !important; right: -5% !important; transform: none !important; }
-  .hg-sp3 { display: block !important; width: 58px !important; height: 58px !important; top: auto !important; bottom: 33% !important; left: 4% !important; transform: none !important; }
-  .hg-sp4 { width: 68px !important; height: 68px !important; top: 10% !important; right: 9% !important; transform: none !important; }
   .nav-links { display: none; }
 
   /* 히어로 */
   .hero-inner { flex-direction: column; align-items: center; gap: 1.5rem; margin-top: 0; }
+  .hero-eyebrow-slot { margin-top: 5rem !important; margin-bottom: 0 !important; top: -1.7rem !important; }
+  .m-eyebrow-br { display: block; }
+  .hero-eyebrow { font-size: 20px !important; letter-spacing: 0.08em !important; }
   .hero-sub-overlay { font-size: 20px !important; letter-spacing: 0.08em !important; }
-  .hero-content { width: auto !important; align-self: flex-start !important; padding-left: 0; max-width: 90%; margin-left: 1.25rem; text-align: left; margin-top: 1rem !important; top: 0 !important; }
-  .hero-headline { font-size: clamp(14px, 4.5vw, 65px) !important; text-align: left; }
+  .hero-content { padding-left: 0; max-width: 100%; text-align: center; margin-top: 0 !important; top: 4.5rem !important; }
+  .hero-headline { font-size: clamp(14px, 4.5vw, 65px) !important; text-align: center; }
   .hero-line1, .hero-line2 { display: block !important; white-space: nowrap !important; }
+  .hero-logo-right { display: flex !important; margin-top: -3rem !important; }
+  .hero-logo-right img { width: 260px !important; margin-top: 2.0rem !important; }
   nav { padding: 1.1rem 1.25rem !important; }
   .nav-brand { margin-left: 0 !important; }
 
   /* 섹션 타이틀 */
   .s-title { font-size: clamp(1.4rem, 5vw, 2rem) !important; }
-  .feat-tag { font-size: 14px !important; }
+  .feat-tag { font-size: 12px !important; }
   .s-eyebrow { font-size: 14px !important; }
-  .feat-title { font-size: clamp(1.3rem, 4.5vw, 1.7rem) !important; white-space: normal !important; }
-  .feat-desc { font-size: 0.95rem !important; margin-top: -0.5rem !important; }
+  .feat-title { font-size: clamp(1.1rem, 4vw, 1.4rem) !important; white-space: normal !important; }
+  .feat-desc { font-size: 0.85rem !important; margin-top: -0.5rem !important; }
   .feat-note { font-size: 0.75rem !important; text-align: center !important; width: 100% !important; }
   .s-desc { font-size: 0.95rem !important; }
 
   /* 피처 섹션 */
   .features-grid-2col { display: flex !important; flex-direction: column !important; padding: 0 1rem !important; gap: 0 !important; }
-  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1rem !important; padding: 2rem 0 !important; border-bottom: 1px solid rgba(30,100,170,0.1) !important; width: 100% !important; box-sizing: border-box !important; }
+  .feature-block { display: flex !important; flex-direction: column !important; min-height: auto !important; gap: 1rem !important; padding: 2rem 0 !important; border-bottom: none !important; width: 100% !important; box-sizing: border-box !important; }
   .feature-block:last-child { border-bottom: none !important; }
   .feat-visual { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
   .feat-visual[style*="display:flex"] { flex-direction: column !important; align-items: center !important; gap: 0.5rem !important; }
@@ -766,11 +856,22 @@ footer {
   .chat-a { max-width: 100% !important; }
 
   .fade-in.features-header { padding-top: 1.5rem !important; margin-bottom: 2rem !important; min-height: unset !important; }
-  .fade-in.features-header img { height: 140px !important; margin-top: 0.75rem !important; }
 
   /* Why / Benefits 그리드 */
-  .why-grid { grid-template-columns: 1fr; max-width: 420px; }
-  .benefits-grid { grid-template-columns: 1fr; max-width: 420px; }
+  .why-grid { grid-template-columns: 1fr; max-width: 420px; gap: 1.1rem !important; }
+  html body .why-card { padding: 1.06rem 1.49rem 1.7rem !important; }
+  html body .why-icon { width: 88px !important; height: 88px !important; }
+  html body .why-card-title { font-size: 1.275rem !important; margin-bottom: 1.45rem !important; }
+  html body .why-card-desc { font-size: 0.85rem !important; }
+  .benefits-grid { grid-template-columns: 1fr; max-width: 420px; gap: 2rem; margin-left: auto !important; margin-right: auto !important; }
+  .benefit-card { border-top: 1px solid rgba(30,100,170,0.15); padding: 1.5rem 0 0 !important; text-align: center !important; }
+  .benefit-card::before { display: none !important; }
+  .benefit-card:first-child { border-top: none; padding-top: 0 !important; }
+  .benefit-icon-wrap { width: 64px !important; height: 64px !important; margin: 0 auto 1rem !important; justify-content: center !important; }
+  .benefit-icon-img { width: 64px !important; }
+  .benefit-title { font-size: 1.2rem !important; }
+  .benefit-desc { font-size: 0.95rem !important; }
+  .benefits-section { padding-top: 4rem !important; }
 
   /* Benefits 배경 이미지 — 모바일에서 잘리지 않게 */
   .benefits-bg-img { width: 85vw !important; max-width: 320px !important; }
@@ -783,9 +884,22 @@ footer {
   .chat-d-br { display: none !important; }
   .chat-m-br { display: inline !important; }
 
-  /* AI 어시스턴트·뉴스레터 표 위로 올리기 + 세로폭 축소 */
-  .feat-visual-ai { margin-top: -1rem !important; transform: scale(0.8); transform-origin: top center; margin-bottom: -4rem !important; }
-  .feat-visual-newsletter { margin-top: -2rem !important; transform: scale(0.55); transform-origin: top center; margin-bottom: -9rem !important; }
+  /* AI 어시스턴트·뉴스레터·표 크기 통일 (동일 스케일, 글씨 비율 왜곡 없음) */
+  .feat-visual-ai { margin-top: 0 !important; transform: scale(0.62); transform-origin: top center; margin-bottom: -8.94rem !important; }
+  .feat-visual-newsletter { margin-top: -1rem !important; transform: scale(0.62); transform-origin: top center; margin-bottom: -9.19rem !important; }
+  #feature3 .feat-sub { margin-top: 0.24rem !important; }
+  #feature3 .feat-note { top: 0 !important; }
+  #feature2 .feat-visual { width: 340px !important; transform: scale(0.7); transform-origin: top center; margin-top: 0 !important; margin-bottom: -5.1rem !important; }
+
+  /* 표·AI채팅 세로 크기 축소 (내부 여백 압축) */
+  .mock-body { padding: 0.85rem 1.1rem !important; }
+  .q-item { padding: 0.32rem 0 !important; }
+  .q-legend { margin-top: 0.5rem !important; padding-top: 0.4rem !important; }
+  .chat-wrap { gap: 0.4rem !important; }
+  .chat-a { padding: 0.55rem 0.8rem !important; }
+  .chat-a-head { margin-bottom: 0.35rem !important; }
+  .chat-note { margin-top: 0.35rem !important; }
+  .ct th, .ct td { padding-top: 0.18rem !important; padding-bottom: 0.18rem !important; }
 
   /* Feature 전체 가운데 정렬 */
   .feature-block { align-items: center !important; }
@@ -796,26 +910,19 @@ footer {
   .feat-sub .chips { flex-wrap: nowrap !important; justify-content: center !important; }
   .feat-sub { align-self: center !important; width: 100% !important; text-align: center !important; }
 
-  /* Feature 4 전체를 위로 — Feature 3 border-bottom 제거 후 Feature 4 border-top으로 이동 */
-  #feature3 { border-bottom: none !important; }
-  #feature4 { margin-top: -3rem !important; border-top: 1px solid rgba(30,100,170,0.1) !important; }
   #feature4 > .feat-copy { margin-top: -0.5rem !important; }
-  #feature2 .feat-visual { margin-left: -0.5rem !important; margin-right: -0.5rem !important; width: calc(100% + 1rem) !important; max-width: calc(100% + 1rem) !important; }
 }
 
 @media (max-width: 560px) {
   .hero-glass-wrap { transform: scale(0.30); }
   .hg-hide-xs { display: none; }
-  .hero-monitor-img { width: 340px !important; max-width: 70vw !important; bottom: 12% !important; right: 0% !important; }
-  .hg-sp1 { width: 280px !important; height: 280px !important; bottom: -16% !important; left: -18% !important; transform: none !important; }
-  .hg-sp2 { width: 120px !important; height: 120px !important; bottom: 3% !important; right: -8% !important; transform: none !important; }
-  .hg-sp3 { display: block !important; width: 46px !important; height: 46px !important; top: auto !important; bottom: 30% !important; left: 3% !important; transform: none !important; }
-  .hg-sp4 { width: 58px !important; height: 58px !important; top: 11% !important; right: 10% !important; transform: none !important; }
   .hero-glass { box-shadow: none !important; }
-  .hero-sub-overlay { font-size: clamp(13px, 3.8vw, 17px) !important; white-space: normal !important; }
-  .hero-content { top: 0 !important; margin-top: 1rem !important; margin-left: 1rem; }
-  .hero-headline { font-size: clamp(22px, 7vw, 65px) !important; text-align: left; }
-  .hero-line1, .hero-line2 { display: block !important; white-space: nowrap !important; word-break: keep-all; text-align: left !important; }
+  .hero-eyebrow-slot { margin-top: 4.5rem !important; top: -2.2rem !important; }
+  .hero-eyebrow { font-size: clamp(13px, 3.8vw, 17px) !important; white-space: normal !important; }
+  .hero-sub-overlay { font-size: clamp(13px, 3.8vw, 17px) !important; white-space: nowrap !important; }
+  .hero-content { top: 3.5rem !important; }
+  .hero-headline { font-size: clamp(22px, 7vw, 65px) !important; text-align: center; }
+  .hero-line1, .hero-line2 { display: block !important; white-space: normal !important; word-break: keep-all; text-align: center !important; }
   .section { padding: 3rem 1rem; }
   .s-title { font-size: clamp(1.2rem, 6vw, 1.6rem) !important; }
   .feat-title { font-size: clamp(1.1rem, 5.5vw, 1.4rem) !important; white-space: normal !important; word-break: keep-all !important; }
@@ -824,7 +931,6 @@ footer {
   .chip { white-space: normal !important; }
   .hero-sub { font-size: 0.82rem !important; margin-top: 0.75rem !important; }
   .hero-arrow { bottom: 1rem !important; }
-  .fade-in.features-header img { height: 110px !important; }
   .feat-visual[style*="display:flex"] img { width: 55% !important; max-width: 150px !important; }
   .mobile-br { display: block; }
   /* FAQ + CTA: 모바일에서 두 섹션이 뷰포트에 함께 들어오게 */
@@ -834,7 +940,7 @@ footer {
   #faq details { padding: 0.9rem 1rem !important; }
   #faq details summary { font-size: clamp(0.82rem, 3.6vw, 1rem) !important; }
   .cta-footer-wrap { min-height: auto !important; }
-  .cta-section { padding: 1.5rem 1rem !important; min-height: 52vh !important; }
+  .cta-section { padding: 1.5rem 1rem !important; min-height: 80vh !important; }
   #cta .s-title { font-size: clamp(1.5rem, 7vw, 2rem) !important; line-height: 1.55 !important; }
   #cta .s-title > span { transform: translateY(0.15rem) !important; }
   #cta .cta-actions { margin-top: 1.25rem !important; }
@@ -857,8 +963,9 @@ footer {
 }
 .nav-hamburger span {
   display: block; width: 22px; height: 2px; background: #F4F8FC;
-  border-radius: 2px; transition: transform 0.2s, opacity 0.2s;
+  border-radius: 2px; transition: transform 0.2s, opacity 0.2s, background-color 0.2s;
 }
+nav.nav-light-theme .nav-hamburger span { background: #1F3A5F; }
 .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav-hamburger.open span:nth-child(2) { opacity: 0; }
 .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -886,36 +993,94 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .fade-in { opacity: 1; transform: none; }
+  html { scroll-snap-type: none; }
 }
-
-/* features-header 이미지↑ 타이틀↓ — 전체 적용 */
-.features-header img { order: 1; }
-.features-header h2.s-title { order: 2; margin-top: 0.25rem; }
 
 /* 데스크탑 전용 */
 @media (min-width: 801px) {
-  .features-header { padding-top: 80px !important; }
-  .features-header img { margin-top: 0 !important; }
+  .features-header { padding-top: 20px !important; }
   .feat-icon-pair { justify-content: flex-start !important; }
   .feat-icon-img { width: 44% !important; }
-  .feat-visual-newsletter { margin-top: -3.7rem !important; }
-  .feat-visual.feat-visual-newsletter { max-width: none !important; width: auto !important; }
+  .feat-visual-newsletter { margin-top: 1rem !important; }
+  .feat-visual.feat-visual-newsletter { max-width: 440px !important; width: 100% !important; }
+  .features-grid-2col { min-height: calc(72vh - 160px) !important; }
 }
 
 @media (min-width: 801px) and (max-width: 1366px) {
   .features-section { padding-bottom: 6rem !important; }
   html body #feature4 .feat-sub { margin-top: 1rem !important; }
+  .why-section { padding-top: 6rem !important; padding-bottom: 2rem !important; }
+  .why-intro { margin-bottom: 2rem !important; }
+
+  /* 노트북 폭 — 피처 2·3·4 표/뉴스레터가 너무 커서 하단 태그가 잘리는 문제 수정 */
+  html body .features-section { justify-content: flex-start !important; padding-bottom: 12px !important; }
+  html body #features { padding-top: 80px !important; }
+  html body .fade-in.features-header { padding-top: 0.25rem !important; margin-bottom: 0.5rem !important; top: 0 !important; }
+  html body #features .s-eyebrow { margin-top: 0.5rem !important; }
+  html body #features .s-title { font-size: 1.7rem !important; }
+  html body .features-grid-2col { top: 0 !important; min-height: 558px !important; }
+  html body .feat-pager-count { bottom: 0.5rem !important; }
+  #feature2, #feature3, #feature4 { padding: 1.25rem 0 !important; gap: 0.6rem !important; }
+  #feature2 .feat-tag, #feature3 .feat-tag, #feature4 .feat-tag { font-size: 14px !important; }
+  #feature2 .feat-title, #feature3 .feat-title, #feature4 .feat-title { font-size: clamp(1.15rem, 1.8vw, 1.4rem) !important; }
+  #feature2 .feat-desc, #feature3 .feat-desc, #feature4 .feat-desc { font-size: 0.85rem !important; margin-top: 0.4rem !important; }
+  #feature2 .feat-visual { transform: scale(0.68); transform-origin: top center; margin-bottom: -108px !important; }
+  html body .feat-visual-ai { transform: scale(0.72); transform-origin: top center; margin-top: 0 !important; margin-bottom: -111px !important; }
+  html body .feat-visual-newsletter { transform: scale(0.62); transform-origin: top center; margin-top: 0 !important; margin-bottom: -147px !important; }
+  #feature2 .feat-sub, #feature4 .feat-sub { margin-top: 0.4rem !important; }
+  #feature3 .feat-note { margin-top: -0.2rem !important; }
+}
+
+/* 데스크탑 캐러셀 — feature-block의 구형 min-height:72vh가 features-grid-2col의
+   calc(72vh - 160px)보다 커서 하단(태그)이 grid의 overflow:hidden에 잘리는 문제 수정 */
+@media (min-width: 1367px) {
+  html body .feature-block { min-height: 0 !important; }
+}
+
+@media (min-width: 1367px) and (max-height: 900px) {
+  html body .why-section { padding-top: 6rem !important; padding-bottom: 2rem !important; }
+  html body .why-intro { margin-bottom: 2rem !important; }
+}
+
+/* 데스크탑인데 화면 높이가 낮은 경우 — 피처 3·4 표/뉴스레터가 커서 하단 태그가 잘리는 문제 보정 */
+@media (min-width: 1367px) and (max-height: 950px) {
+  html body #feature2 .feat-visual { transform: scale(0.94); transform-origin: top center; margin-bottom: -20px !important; }
+  html body .feat-visual-ai { transform: scale(0.78); transform-origin: top center; margin-bottom: -87px !important; }
+  html body .feat-visual-newsletter { transform: scale(0.9); transform-origin: top center; margin-bottom: -4px !important; }
+}
+
+/* 초와이드 데스크탑 — 피처 섹션 전체 크기 확대 (위치·비율은 그대로) */
+@media (min-width: 1920px) {
+  html body .features-grid-2col { max-width: 1560px !important; }
+  html body .feat-copy { max-width: 672px !important; }
+  html body .feat-tag { font-size: 20px !important; }
+  html body .feat-title { font-size: 36px !important; }
+  html body .feat-desc { font-size: 23px !important; }
+  html body .feat-visual { max-width: 528px !important; }
+  html body .feat-visual.feat-visual-newsletter { max-width: 528px !important; }
 }
 
 /* 기관 커뮤니케이션 모바일 위치 조정 — 최하단 최고 특이도 */
 @media (max-width: 800px) {
-  html body .features-header { padding-top: 0 !important; margin-top: -1rem !important; }
-  html body .features-header img { margin-top: 1.75rem !important; }
+  html body .features-header { padding-top: 0 !important; margin-top: 1rem !important; }
   html body .feat-icon-arrow { transform: rotate(0deg) !important; }
-  html body #feature3 { border-bottom: none !important; padding-bottom: 5rem !important; }
-  html body #feature4 { margin-top: -4rem !important; border-top: 1px solid rgba(30,100,170,0.1) !important; }
-  html body #feature3 .feat-sub { margin-top: -0.75rem !important; }
+  html body #feature3 { padding-bottom: 5rem !important; }
   html body .features-section { padding-bottom: 3rem !important; }
+  /* 데스크탑용 좌우 오프셋 초기화 — 모바일에서 정가운데 정렬 */
+  html body .feat-copy { margin-left: 0 !important; }
+  html body .features-grid-2col { left: 0 !important; top: -2.5rem !important; }
+  html body .feat-pager-arrow { top: calc(50% + 2.1rem) !important; }
+  html body .chip { font-size: 0.75rem !important; padding: 0.25rem 0.75rem !important; }
+  html body #feature2 .feat-sub { margin-top: 1.65rem !important; }
+  html body #feature1 .feat-sub { margin-top: 4.14rem !important; }
+  html body #feature4 .feat-sub { margin-top: 1.23rem !important; }
+  html body .feat-pager-count { bottom: 7.5rem !important; }
+  .feat1-br-mobile { display: inline; }
+  .feat1-br-desktop { display: none; }
+  .feat2-br-mobile { display: inline; }
+  .feat2-br-desktop { display: none; }
+  html body .feat-index { margin-top: -0.4rem !important; }
+  html body .feat-pager-arrow svg { width: 11px !important; height: 20px !important; }
 }
 
 /* feat-icon-pair 항상 가로 배치 — 창 크기 무관 */
@@ -926,6 +1091,35 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   html body .feat-visual { max-width: 480px !important; }
   html body .chat-a { max-width: 320px !important; }
   html body .feat-icon-img { width: 36% !important; max-width: 150px !important; }
+}
+
+/* ─── 우측 섹션 네비게이터 ─────────────────────────────────── */
+.section-nav {
+  position: fixed; left: auto; right: 5.75rem; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+  width: auto; padding: 0; margin: 0; background: none; border: none; z-index: 90;
+}
+.section-nav a {
+  position: relative;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(114,153,184,0.4);
+  display: block;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.section-nav a::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 32px; height: 32px; transform: translate(-50%, -50%);
+}
+.section-nav a:hover { background: rgba(114,153,184,0.75); }
+.section-nav a.active { background: #4BA3DE; transform: scale(1.4); }
+.section-nav.section-nav-light a { background: rgba(31,104,176,0.3); }
+.section-nav.section-nav-light a:hover { background: rgba(31,104,176,0.55); }
+.section-nav.section-nav-light a.active { background: #1F68B0; }
+.section-nav.section-nav-blue a { background: rgba(255,255,255,0.4); }
+.section-nav.section-nav-blue a:hover { background: rgba(255,255,255,0.7); }
+.section-nav.section-nav-blue a.active { background: #ffffff; }
+@media (max-width: 1000px) {
+  .section-nav { display: none; }
 }
 
 </style>
@@ -940,63 +1134,98 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   <ul class="nav-links">
     <li><a href="#why" onclick="event.preventDefault();document.getElementById('why').scrollIntoView({behavior:'smooth'});">제품 소개</a></li>
     <li><a href="#features" onclick="event.preventDefault();document.getElementById('features').scrollIntoView({behavior:'smooth'});">핵심 기능</a></li>
+    <li><a href="#benefits" onclick="event.preventDefault();document.getElementById('benefits').scrollIntoView({behavior:'smooth'});">기대 효과</a></li>
+    <li><a href="#cta" onclick="event.preventDefault();document.getElementById('cta').scrollIntoView({behavior:'smooth'});">FAQ</a></li>
   </ul>
   <button class="nav-hamburger" onclick="this.classList.toggle('open');document.getElementById('mobile-menu').classList.toggle('open')" aria-label="메뉴">
     <span></span><span></span><span></span>
   </button>
 </nav>
+<nav class="section-nav" aria-label="섹션 이동">
+  <a href="#hero" data-section="hero" aria-label="히어로로 이동" onclick="event.preventDefault();document.getElementById('hero').scrollIntoView({behavior:'smooth'});"></a>
+  <a href="#why" data-section="why" aria-label="제품 소개로 이동" onclick="event.preventDefault();document.getElementById('why').scrollIntoView({behavior:'smooth'});"></a>
+  <a href="#features" data-section="features" aria-label="핵심 기능으로 이동" onclick="event.preventDefault();document.getElementById('features').scrollIntoView({behavior:'smooth'});"></a>
+  <a href="#benefits" data-section="benefits" aria-label="기대 효과로 이동" onclick="event.preventDefault();document.getElementById('benefits').scrollIntoView({behavior:'smooth'});"></a>
+  <a href="#faq" data-section="faq" aria-label="FAQ로 이동" onclick="event.preventDefault();document.getElementById('faq').scrollIntoView({behavior:'smooth'});"></a>
+  <a href="#cta" data-section="cta" aria-label="CTA로 이동" onclick="event.preventDefault();document.getElementById('cta').scrollIntoView({behavior:'smooth'});"></a>
+</nav>
 <div id="mobile-menu">
   <a href="#why" onclick="event.preventDefault();document.getElementById('mobile-menu').classList.remove('open');document.querySelector('.nav-hamburger').classList.remove('open');document.getElementById('why').scrollIntoView({behavior:'smooth'});">제품 소개</a>
   <a href="#features" onclick="event.preventDefault();document.getElementById('mobile-menu').classList.remove('open');document.querySelector('.nav-hamburger').classList.remove('open');document.getElementById('features').scrollIntoView({behavior:'smooth'});">핵심 기능</a>
+  <a href="#benefits" onclick="event.preventDefault();document.getElementById('mobile-menu').classList.remove('open');document.querySelector('.nav-hamburger').classList.remove('open');document.getElementById('benefits').scrollIntoView({behavior:'smooth'});">기대 효과</a>
+  <a href="#cta" onclick="event.preventDefault();document.getElementById('mobile-menu').classList.remove('open');document.querySelector('.nav-hamburger').classList.remove('open');document.getElementById('cta').scrollIntoView({behavior:'smooth'});">FAQ</a>
 </div>
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-mesh" aria-hidden="true">
-    <div class="hero-mesh-blob b1"></div>
-    <div class="hero-mesh-blob b2"></div>
-    <div class="hero-mesh-blob b3"></div>
-    <div class="hero-mesh-blob b4"></div>
-  </div>
+  <canvas id="hero-canvas"></canvas>
+  <canvas id="geo-canvas"></canvas>
   <div class="hero-glow"></div>
 
-  <!-- 큰 원형 도형 (포스터 스타일: 소수·대형·모서리에 걸치는 배치) -->
-  <div class="hero-glass-wrap hg-sp1" style="width:580px;height:580px;bottom:-20%;left:-15%;transform-origin:bottom left">
-    <div class="hero-glass hg-sphere" style="animation-duration:5.2s;animation-delay:0s;--g-rot:-6deg;--g-y:-16px"></div></div>
-  <div class="hero-glass-wrap hg-sp2" style="width:500px;height:500px;bottom:-18%;right:-11%;transform-origin:bottom right">
-    <div class="hero-glass hg-sphere" style="animation-duration:4.6s;animation-delay:0.8s;--g-rot:8deg;--g-y:-14px"></div></div>
-  <div class="hero-glass-wrap hg-hide-sm hg-sp3" style="width:260px;height:260px;top:-6%;left:6%;transform-origin:top left">
-    <div class="hero-glass hg-sphere" style="animation-duration:4.9s;animation-delay:1.6s;--g-rot:-10deg;--g-y:-18px"></div></div>
-  <div class="hero-glass-wrap hg-sp4" style="width:120px;height:120px;top:14%;right:16%;transform-origin:top right">
-    <div class="hero-glass hg-sphere" style="animation-duration:4.0s;animation-delay:1.2s;--g-rot:10deg;--g-y:-14px"></div></div>
+  <!-- 왼쪽 글래스 도형 -->
+  <div class="hero-glass-wrap" style="width:134px;height:134px;top:6%;left:-3%;transform-origin:top left">
+    <div class="hero-glass hg-sphere" style="animation-duration:4.6s;animation-delay:0s;--g-rot:-8deg;--g-y:-22px"></div></div>
+  <div class="hero-glass-wrap hg-hide-xs" style="width:54px;height:54px;top:44%;left:8%;transform-origin:top left">
+    <div class="hero-glass hg-ring" style="animation-duration:5.2s;animation-delay:1.2s;--g-rot:18deg;--g-y:-14px"></div></div>
+  <div class="hero-glass-wrap hg-hide-sm" style="width:104px;height:104px;top:80%;left:-2%;transform-origin:top left">
+    <div class="hero-glass hg-triangle" style="animation-duration:4.0s;animation-delay:0.6s;--g-rot:-22deg;--g-y:-18px"></div></div>
+  <div class="hero-glass-wrap hg-hide-md" style="width:20px;height:72px;top:24%;left:19%;transform-origin:top left">
+    <div class="hero-glass hg-capsule" style="animation-duration:4.9s;animation-delay:1.8s;--g-rot:28deg;--g-y:-20px"></div></div>
+  <div class="hero-glass-wrap hg-hide-sm" style="width:48px;height:48px;top:62%;left:17%;transform-origin:top left">
+    <div class="hero-glass hg-sphere" style="animation-duration:3.8s;animation-delay:2.4s;--g-rot:6deg;--g-y:-12px"></div></div>
 
-  <!-- 추가 소형 원형 도형 (모니터 이미지 위쪽 여백, 타이틀/서브와 겹치지 않는 영역) -->
-  <div class="hero-glass-wrap hg-hide-sm" style="width:36px;height:36px;top:22%;right:6%;transform-origin:center">
-    <div class="hero-glass hg-ring" style="animation-duration:4.3s;animation-delay:0.5s;--g-rot:14deg;--g-y:-10px"></div></div>
-  <div class="hero-glass-wrap hg-hide-sm" style="width:28px;height:28px;top:62%;left:10%;transform-origin:center">
-    <div class="hero-glass hg-sphere" style="animation-duration:3.6s;animation-delay:2.0s;--g-rot:-8deg;--g-y:-8px"></div></div>
-  <div class="hero-glass-wrap hg-hide-sm" style="width:44px;height:44px;top:44%;right:10%;transform-origin:center">
-    <div class="hero-glass hg-sphere" style="animation-duration:5.1s;animation-delay:0.9s;--g-rot:6deg;--g-y:-12px"></div></div>
+  <!-- 오른쪽 글래스 도형 -->
+  <div class="hero-glass-wrap" style="width:116px;height:116px;top:5%;right:-4%;transform-origin:top right">
+    <div class="hero-glass hg-gem" style="animation-duration:5.0s;animation-delay:0.4s;--g-rot:14deg;--g-y:-22px"></div></div>
+  <div class="hero-glass-wrap hg-hide-md" style="width:118px;height:28px;top:72%;right:-3%;transform-origin:top right">
+    <div class="hero-glass hg-capsule" style="animation-duration:4.3s;animation-delay:2.0s;--g-rot:-10deg;--g-y:-12px"></div></div>
+  <div class="hero-glass-wrap hg-hide-sm" style="width:58px;height:58px;top:40%;right:6%;transform-origin:top right">
+    <div class="hero-glass hg-sphere" style="animation-duration:3.9s;animation-delay:0.9s;--g-rot:4deg;--g-y:-18px"></div></div>
+  <div class="hero-glass-wrap hg-hide-md" style="width:40px;height:40px;top:26%;right:18%;transform-origin:top right">
+    <div class="hero-glass hg-triangle" style="animation-duration:5.5s;animation-delay:1.5s;--g-rot:12deg;--g-y:-10px"></div></div>
+  <div class="hero-glass-wrap" style="width:102px;height:102px;top:57%;right:13%;transform-origin:top right">
+    <div class="hero-glass hg-ring" style="animation-duration:4.4s;animation-delay:2.8s;--g-rot:-22deg;--g-y:-22px"></div></div>
 
+  <!-- 소형 화면 전용 추가 도형 -->
+  <div class="hero-glass-wrap hg-show-sm" style="width:88px;height:88px;top:22%;left:2%;transform-origin:top left">
+    <div class="hero-glass hg-triangle" style="animation-duration:4.2s;animation-delay:1.1s;--g-rot:-26deg;--g-y:-16px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm hg-hide-sm" style="width:18px;height:80px;top:42%;left:7%;transform-origin:top left">
+    <div class="hero-glass hg-capsule" style="animation-duration:5.1s;animation-delay:0.7s;--g-rot:34deg;--g-y:-18px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm hg-hide-sm" style="width:66px;height:66px;top:55%;left:11%;transform-origin:top left">
+    <div class="hero-glass hg-gem" style="animation-duration:3.7s;animation-delay:2.1s;--g-rot:-14deg;--g-y:-14px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm" style="width:36px;height:36px;top:35%;right:2%;transform-origin:top right">
+    <div class="hero-glass hg-sphere" style="animation-duration:4.8s;animation-delay:1.6s;--g-rot:8deg;--g-y:-14px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm hg-hide-sm" style="width:76px;height:76px;top:27%;right:4%;transform-origin:top right">
+    <div class="hero-glass hg-ring" style="animation-duration:3.6s;animation-delay:0.3s;--g-rot:-18deg;--g-y:-16px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm" style="width:82px;height:24px;top:50%;right:9%;transform-origin:top right">
+    <div class="hero-glass hg-capsule" style="animation-duration:5.3s;animation-delay:2.5s;--g-rot:22deg;--g-y:-10px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm" style="width:78px;height:78px;top:65%;left:2%;transform-origin:top left">
+    <div class="hero-glass hg-gem" style="animation-duration:4.1s;animation-delay:0.5s;--g-rot:-30deg;--g-y:-18px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm" style="width:52px;height:52px;top:14%;right:2%;transform-origin:top right">
+    <div class="hero-glass hg-ring" style="animation-duration:3.8s;animation-delay:1.9s;--g-rot:16deg;--g-y:-12px"></div></div>
+  <div class="hero-glass-wrap hg-show-sm" style="width:42px;height:42px;top:70%;right:5%;transform-origin:top right">
+    <div class="hero-glass hg-triangle" style="animation-duration:5.0s;animation-delay:3.1s;--g-rot:-8deg;--g-y:-10px"></div></div>
 
   <div class="hero-inner" style="padding-top:2.2rem;">
     <div class="hero-content">
       <h1 class="hero-headline"><span class="hero-line1">임상 모니터링, 사후 집계에서</span><span class="hero-line2">실시간 의사결정으로</span></h1>
+    </div>
+    <div class="hero-eyebrow-slot">
       <p class="hero-sub-overlay">데이터가 쌓이는 순간 <span class="hero-sub-insight">Insight</span>가 됩니다.</p>
+    </div>
+    <div class="hero-logo-right" style="flex-direction:column;">
+      <img src="logo/ti-logo-icon-white.png" alt="Trial Insight" style="width: 540px; height: auto; margin-top:2.3rem;">
     </div>
   </div>
 
   <!-- 스크롤 유도 화살표 -->
-  <a href="#why" onclick="event.preventDefault();document.getElementById('why').scrollIntoView({behavior:'smooth'});" class="hero-arrow" style="position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0rem;text-decoration:none;opacity:0.85;animation:heroArrowFloat 2.5s cubic-bezier(0.45,0,0.55,1) infinite;z-index:10;">
-    <svg width="78" height="30" viewBox="0 0 52 20" fill="none" style="filter: drop-shadow(0 2px 6px rgba(0,20,60,0.45));"><path d="M4 4L26 16L48 4" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <a href="#why" onclick="event.preventDefault();document.getElementById('why').scrollIntoView({behavior:'smooth'});" class="hero-arrow" style="position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0rem;text-decoration:none;opacity:0.85;z-index:10;">
+    <svg width="78" height="30" viewBox="0 0 52 20" fill="none"><path d="M4 4L26 16L48 4" stroke="#7DC8F0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
-
-  <!-- 오른쪽 아래 모니터 이미지 -->
-  <img src="icons/icon-monitor-geo.png" alt="" aria-hidden="true" class="hero-monitor-img" style="position:absolute; bottom:3%; right:2%; width:700px; max-width:48vw; height:auto; z-index:2; pointer-events:none; opacity:1;">
 </section>
 
 <!-- WHY -->
-<section class="section why-section" id="why" style="padding-top: 6rem; padding-bottom: calc(clamp(6rem, 10vw, 9rem) + 6rem);">
+<section class="section why-section" id="why" style="padding-top: 9rem; padding-bottom: clamp(3rem, 6vw, 5rem);">
   <div class="why-intro fade-in" style="margin-top:0; position:relative; top:-4rem;">
     <div class="s-eyebrow">Why Trial Insight</div>
     <h2 class="s-title" style="margin-top: -1rem;">현장이 요구했고,<br>우리가 만들었습니다.</h2>
@@ -1030,35 +1259,43 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 </section>
 
 <!-- FEATURES -->
-<section class="section features-section" id="features" style="padding-top: 0; margin-top: -9rem; padding-bottom: calc(clamp(6rem, 10vw, 9rem) - 7rem);">
-  <nav class="feature-dots" aria-label="핵심 기능 섹션 이동">
-    <a href="#feature1" class="feature-dot" data-target="feature1" aria-label="Feature 1"></a>
-    <a href="#feature2" class="feature-dot" data-target="feature2" aria-label="Feature 2"></a>
-    <a href="#feature3" class="feature-dot" data-target="feature3" aria-label="Feature 3"></a>
-    <a href="#feature4" class="feature-dot" data-target="feature4" aria-label="Feature 4"></a>
-  </nav>
-  <div class="fade-in features-header" style="margin-bottom:-5.5rem; text-align:center; margin-top:-2.5rem; position:relative; min-height:330px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:0px; gap:0.25rem;">
-    <h2 class="s-title" style="position:relative; z-index:1; margin:0; color:#1B3A6B;">핵심 기능</h2>
-    <img src="logo/ti-logo-full.png" alt="" aria-hidden="true" style="display:block; margin:0.5rem auto 0; height:180px; width:auto; max-width:90%; position:relative; z-index:1;">
+<section class="section features-section" id="features" style="padding-top: 80px; margin-top: 0; padding-bottom: 2rem;">
+  <div class="features-scroll-hint" aria-hidden="true">
+    <span>SCROLL</span>
+    <svg width="16" height="9" viewBox="0 0 16 9" fill="none"><path d="M1 1L8 7.5L15 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="feature-pager" aria-label="핵심 기능 이전/다음 이동">
+    <button type="button" class="feat-pager-arrow feat-pager-prev" aria-label="이전 기능">
+      <svg width="30" height="52" viewBox="0 0 20 52" fill="none"><path d="M16 4L4 26L16 48" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="feat-pager-count"><span class="feat-pager-current">01</span> / 04</span>
+    <button type="button" class="feat-pager-arrow feat-pager-next" aria-label="다음 기능">
+      <svg width="30" height="52" viewBox="0 0 20 52" fill="none"><path d="M4 4L16 26L4 48" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="fade-in features-header" style="margin-bottom:2rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.25rem; position:relative; top:-4.5rem;">
+    <div class="s-eyebrow" style="margin-top:3.5rem;">KEY FEATURES</div>
+    <h2 class="s-title" style="position:relative; z-index:1; margin:0; margin-top:-1.5rem; color:#1B3A6B;">핵심 기능</h2>
   </div>
 
-  <div class="features-grid-2col">
+  <div class="features-grid-2col" style="position:relative; top:-2.5rem; left:2rem;">
   <!-- Feature 1 -->
   <div id="feature1" class="feature-block fade-in">
     <div class="feat-copy">
+      <div class="feat-index">핵심 기능 01</div>
       <div class="feat-tag">Daily Data Sync</div>
       <h3 class="feat-title" style="white-space:nowrap;">EDC 자동 동기화·시각화</h3>
-      <p class="feat-desc">매일 정해진 시점에 동기화하여 데이터를<br>검토·모니터링합니다. 등록 현황·유효성·안전성 현황을<br>매일 시각화합니다.</p>
+      <p class="feat-desc">매일 정해진 시점에 동기화하여 데이터를<br>검토·모니터링합니다. 등록 현황·유효성·안전성<br class="feat1-br-mobile"> 현황을<br class="feat1-br-desktop"> 매일 시각화합니다.</p>
     </div>
     <div class="feat-right">
-    <div class="feat-visual feat-icon-pair" style="background:none; box-shadow:none; display:flex; align-items:center; justify-content:center; gap:0; margin-top:-1rem;">
-      <img class="feat-icon-img" src="icons/icon-folder.png" style="width:55%; max-width:1800px; display:block; object-fit:contain; margin-right:-1.5rem;">
+    <div class="feat-visual feat-icon-pair" style="background:none; box-shadow:none; display:flex; align-items:center; justify-content:center; gap:0; margin-top:-1rem; width:100%; margin-left:auto; margin-right:auto;">
+      <img class="feat-icon-img" src="icons/icon-folder.png" alt="" aria-hidden="true" style="width:42%; max-width:220px; display:block; object-fit:contain; margin-right:-1.5rem;">
       <div class="feat-icon-arrow" style="display:flex; align-items:center; flex-shrink:0;">
         <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M8 20H32M32 20L22 10M32 20L22 30" stroke="#2173BC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <img class="feat-icon-img" src="icons/icon-3dgraph.png" style="width:55%; max-width:1800px; display:block; object-fit:contain; margin-left:-1.5rem;">
+      <img class="feat-icon-img" src="icons/icon-3dgraph.png" alt="" aria-hidden="true" style="width:42%; max-width:220px; display:block; object-fit:contain; margin-left:-1.5rem;">
     </div>
     <div class="feat-sub" style="display:flex; flex-direction:column; align-items:center; margin-top:0.75rem;">
       <div class="chips" style="justify-content:center;">
@@ -1072,12 +1309,13 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   <!-- Feature 2 -->
   <div id="feature2" class="feature-block fade-in">
     <div class="feat-copy">
+      <div class="feat-index">핵심 기능 02</div>
       <div class="feat-tag">Central Monitoring</div>
       <h3 class="feat-title" style="white-space:nowrap;">데이터 품질·정합성 자동 점검</h3>
-      <p class="feat-desc">데이터 오류와 이상 패턴을 매일 자동 점검하고,<br>기관별로 점수화하여 자료 정합성과 기관 관리<br>상태를 한눈에 파악합니다.</p>
+      <p class="feat-desc">데이터 오류와 이상 패턴을 매일 자동 점검하고,<br>기관별로 점수화하여 자료 정합성과<br class="feat2-br-mobile"> 기관 관리<br class="feat2-br-desktop"> 상태를 한눈에 파악합니다.</p>
     </div>
     <div class="feat-right">
-    <div class="feat-visual" style="width:100%; max-width:440px; margin-left:auto; margin-right:auto;">
+    <div class="feat-visual" style="width:100%; max-width:440px; margin-left:auto; margin-right:auto; margin-top:1rem;">
       <div class="mock-titlebar">
         <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
         <span class="tb-title" style="font-size:0.8rem;">자동 점검 항목 (예시)</span>
@@ -1109,12 +1347,13 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   <!-- Feature 3 -->
   <div id="feature3" class="feature-block fade-in">
     <div class="feat-copy">
+      <div class="feat-index">핵심 기능 03</div>
       <div class="feat-tag">Ask Your Data</div>
       <h3 class="feat-title">AI 연구 어시스턴트</h3>
       <p class="feat-desc">자연어로 질문하면 차트·요약으로 즉답합니다.<br><span style="white-space:nowrap">데이터 조회·해석 및 인사이트 도출에 도움을 줍니다.</span></p>
     </div>
     <div class="feat-right">
-    <div class="feat-visual feat-visual-ai" style="width:100%; max-width:480px; margin-left:auto; margin-right:auto; margin-top:1rem;">
+    <div class="feat-visual feat-visual-ai" style="width:100%; max-width:440px; margin-left:auto; margin-right:auto; margin-top:1rem;">
       <div class="mock-titlebar">
         <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
         <span class="tb-title" style="font-size:0.8rem;">AI Assistant</span>
@@ -1155,14 +1394,15 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   <!-- Feature 4 -->
   <div id="feature4" class="feature-block fade-in">
     <div class="feat-copy" style="margin-top:1rem;">
+      <div class="feat-index">핵심 기능 04</div>
       <div class="feat-tag" style="margin-top:0.1rem;">Auto Reports</div>
       <h3 class="feat-title">기관 커뮤니케이션</h3>
       <p class="feat-desc">기관별 정기 보고서·뉴스레터를 자동 생성·발송하여,<br>등록 독려에 활용하고 의뢰사 로고로 브랜딩합니다.</p>
     </div>
     <div class="feat-right">
-    <div class="feat-visual feat-visual-newsletter" style="background:none; border-radius:0; box-shadow:none; overflow:visible; padding:1rem 0; position:relative; margin-top:-2rem; margin-bottom:1rem;">
+    <div class="feat-visual feat-visual-newsletter" style="background:none; border-radius:0; box-shadow:none; overflow:visible; padding:1rem 0; position:relative; margin-top:1rem; margin-bottom:2rem; margin-left:auto; margin-right:auto;">
       <!-- 뉴스레터 문서 -->
-      <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 16px 60px rgba(10,40,100,0.07);width:380px;max-width:100%;margin:0 auto;">
+      <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 16px 60px rgba(10,40,100,0.07);width:340px;max-width:100%;margin:0 auto;">
         <!-- 헤더 -->
         <div style="background:#6B8FBF;padding:0.7rem 1.25rem;text-align:center;">
           <span style="color:#fff;font-size:0.85rem;font-weight:800;letter-spacing:0.18em;">NEWSLETTER</span>
@@ -1224,37 +1464,37 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 </section>
 
 <!-- BENEFITS -->
-<section class="section benefits-section" style="margin-top: -2rem; padding-top: calc(clamp(6rem, 10vw, 9rem) + 2rem); padding-bottom: calc(clamp(6rem, 10vw, 9rem) + 2.5rem);">
-  <div class="benefits-intro fade-in" style="position:relative; background: radial-gradient(ellipse 90% 140% at 50% 50%, rgba(255,255,255,0.82) 30%, rgba(255,255,255,0) 100%);">
-    <img src="icons/icon-memo.png" class="benefits-bg-img" style="position:absolute; width:650px; top:75%; left:50%; transform:translate(-50%,-50%); opacity:0.3; pointer-events:none; z-index:0; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 80%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 80%);">
-    <h2 class="s-title" style="color:#1B3A6B; position:relative; z-index:2; margin-top:-3rem;">사후보고에서<br>실시간 의사결정으로</h2>
+<section class="section benefits-section" id="benefits" style="margin-top: 0; padding-top: calc(2rem + 80px); padding-bottom: 2rem; box-sizing: border-box;">
+  <div class="benefits-intro fade-in" style="position:relative; text-align:center; background: radial-gradient(ellipse 90% 140% at 50% 50%, rgba(255,255,255,0.82) 30%, rgba(255,255,255,0) 100%);">
+    <img src="icons/icon-memo.png" class="benefits-bg-img" alt="" aria-hidden="true" style="position:absolute; width:650px; top:65%; left:50%; transform:translate(-50%,-50%); opacity:0.3; pointer-events:none; z-index:0; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 80%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 80%);">
+    <h2 class="s-title" style="color:#1B3A6B; position:relative; z-index:2; margin-top:-1rem;">사후보고에서<br>실시간 의사결정으로</h2>
     <p class="s-desc" style="position:relative; z-index:2;">데이터 수기 취합 · 사후 집계의 반복 업무를 제거하고,<br>데이터가 쌓이는 순간 의사결정에 쓸 수 있는<br>인사이트로 전환합니다.</p>
   </div>
   <div class="benefits-grid">
     <div class="benefit-card fade-in" style="transition-delay:0s">
-      <div class="benefit-icon-wrap" style="background:none; width:80px; height:80px;">
-        <img src="icons/icon-barchart.png" class="benefit-icon-img" style="width:90px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
+      <div class="benefit-icon-wrap" style="background:none; width:100px; height:100px;">
+        <img src="icons/icon-barchart.png" class="benefit-icon-img" alt="" aria-hidden="true" style="width:110px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
       </div>
       <div class="benefit-title">통합 시각화</div>
       <p class="benefit-desc">분산된 데이터를 하나의 화면에서<br>한눈에 파악합니다.</p>
     </div>
     <div class="benefit-card fade-in" style="transition-delay:0.2s">
-      <div class="benefit-icon-wrap" style="background:none; width:80px; height:80px;">
-        <img src="icons/icon-lightning.png" class="benefit-icon-img" style="width:90px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
+      <div class="benefit-icon-wrap" style="background:none; width:100px; height:100px;">
+        <img src="icons/icon-lightning.png" class="benefit-icon-img" alt="" aria-hidden="true" style="width:110px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
       </div>
       <div class="benefit-title">빠른 의사결정</div>
       <p class="benefit-desc">핵심 지표를 한눈에 파악해<br>즉각 대응할 수 있습니다.</p>
     </div>
     <div class="benefit-card fade-in" style="transition-delay:0.4s">
-      <div class="benefit-icon-wrap" style="background:none; width:80px; height:80px;">
-        <img src="icons/icon-safety.png" class="benefit-icon-img flipped" style="width:90px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
+      <div class="benefit-icon-wrap" style="background:none; width:100px; height:100px;">
+        <img src="icons/icon-safety.png" class="benefit-icon-img flipped" alt="" aria-hidden="true" style="width:110px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
       </div>
       <div class="benefit-title">안전성 모니터링 지원</div>
       <p class="benefit-desc">이상 신호를 빠르게 가시화하여<br>선제적으로 대응합니다.</p>
     </div>
     <div class="benefit-card fade-in" style="transition-delay:0.6s">
-      <div class="benefit-icon-wrap" style="background:none; width:80px; height:80px;">
-        <img src="icons/icon-arrow-monitor.png" class="benefit-icon-img" style="width:90px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
+      <div class="benefit-icon-wrap" style="background:none; width:100px; height:100px;">
+        <img src="icons/icon-arrow-monitor.png" class="benefit-icon-img" alt="" aria-hidden="true" style="width:110px; height:auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), filter 0.35s;">
       </div>
       <div class="benefit-title">운영 효율화</div>
       <p class="benefit-desc">정기 뉴스레터 자동 발행으로<br>반복 업무를 제거합니다.</p>
@@ -1264,17 +1504,17 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 
 <!-- CTA + FOOTER WRAPPER -->
 <!-- FAQ -->
-<section id="faq" style="background:linear-gradient(160deg,#EBF4FF 0%,#F6FAFF 55%,#FAFCFF 100%); padding:5rem 1.5rem; position:relative; overflow:hidden;">
-  <img src="icons/icon-search-3d.png" alt="" aria-hidden="true" style="position:absolute; width:320px; height:auto; left:50%; top:2rem; transform:translateX(calc(-50% + 0.7rem)) translateY(-1.2rem); opacity:0.5; pointer-events:none; z-index:0; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%); mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%);">
+<section id="faq" style="background:linear-gradient(160deg,#EBF4FF 0%,#F6FAFF 55%,#FAFCFF 100%); padding:5rem 1.5rem; padding-top:calc(5rem + 80px); position:relative; overflow:hidden; scroll-snap-align:start; min-height:100vh; display:flex; flex-direction:column; justify-content:center; box-sizing:border-box;">
+  <img src="icons/icon-search-3d.png" alt="" aria-hidden="true" style="position:absolute; width:300px; height:auto; left:50%; top:8rem; transform:translateX(calc(-50% + 0.7rem)) translateY(0rem); opacity:0.5; pointer-events:none; z-index:0; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%); mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%);">
 
-  <div style="max-width:760px; margin:0 auto; position:relative; z-index:1;">
+  <div style="width:100%; max-width:800px; margin:0 auto; position:relative; z-index:1; box-sizing:border-box;">
     <div class="fade-in" style="text-align:center; margin-bottom:3rem;">
       <div class="s-eyebrow" style="margin-bottom:0.75rem;">FAQ</div>
-      <h2 class="s-title" style="font-size:clamp(1.6rem,3.5vw,2.2rem); color:#0D1F35; text-shadow:0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.7), 0 0 60px rgba(255,255,255,0.4);">자주 묻는 질문</h2>
+      <h2 class="s-title" style="color:#1B3A6B; text-shadow:0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.7), 0 0 60px rgba(255,255,255,0.4);">자주 묻는 질문</h2>
     </div>
     <div style="display:flex; flex-direction:column; gap:0.75rem;">
 
-      <details class="fade-in" style="transition-delay:0.2s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
+      <details class="fade-in" style="transition-delay:0.1s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
         <summary style="font-size:1rem; font-weight:700; color:#0D1F35; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
           도입 절차는 어떻게 되나요?
           <span style="font-size:1.2rem; color:#1F68B0; flex-shrink:0;">＋</span>
@@ -1284,7 +1524,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
         </p>
       </details>
 
-      <details class="fade-in" style="transition-delay:0.5s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
+      <details class="fade-in" style="transition-delay:0.2s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
         <summary style="font-size:1rem; font-weight:700; color:#0D1F35; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
           데이터 보안은 어떻게 관리되나요?
           <span style="font-size:1.2rem; color:#1F68B0; flex-shrink:0;">＋</span>
@@ -1294,7 +1534,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
         </p>
       </details>
 
-      <details class="fade-in" style="transition-delay:0.8s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
+      <details class="fade-in" style="transition-delay:0.3s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
         <summary style="font-size:1rem; font-weight:700; color:#0D1F35; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
           어떤 EDC 시스템과 연동되나요?
           <span style="font-size:1.2rem; color:#1F68B0; flex-shrink:0;">＋</span>
@@ -1304,7 +1544,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
         </p>
       </details>
 
-      <details class="fade-in" style="transition-delay:1.1s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
+      <details class="fade-in" style="transition-delay:0.4s; background:#fff; border:1px solid rgba(30,100,170,0.12); border-radius:12px; padding:1.25rem 1.5rem; cursor:pointer; box-shadow:0 2px 12px rgba(10,40,100,0.06);">
         <summary style="font-size:1rem; font-weight:700; color:#0D1F35; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
           규제 문서 및 인허가 관련 사항이 있나요?
           <span style="font-size:1.2rem; color:#1F68B0; flex-shrink:0;">＋</span>
@@ -1318,16 +1558,16 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   </div>
 </section>
 
-<div class="cta-footer-wrap" style="min-height:100vh; display:flex; flex-direction:column;">
+<div class="cta-footer-wrap" style="min-height:100vh; display:flex; flex-direction:column; scroll-snap-align:start;">
 
 <!-- CTA -->
-<section class="cta-section" id="cta" style="flex:1; position:relative; overflow:hidden;">
+<section class="cta-section" id="cta" style="flex:1; min-height:0; position:relative; overflow:hidden; padding-top:80px; box-sizing:border-box;">
   <img src="icons/icon-logo-memo.png" alt="" aria-hidden="true" style="position:absolute; width:500px; height:auto; opacity:0.45; pointer-events:none; bottom:16px; left:50%; transform:translateX(calc(-50% + 1.5rem)) rotate(-12deg); z-index:0; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%); mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%);">
 
 
-  <div class="fade-in" style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; height:100%;">
-    <h2 class="s-title" style="margin-top:1rem;"><span style="font-family:'KBLJumpCondensed',sans-serif; font-weight:800; font-style:normal; display:inline-block; transform:translateY(-0.3rem);">Trial Insight</span>가<br class="mobile-br"> 궁금하신가요?</h2>
-    <div class="cta-actions" style="margin-top:2.5rem;">
+  <div class="fade-in" style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; height:100%; margin-top:2.5rem;">
+    <h2 class="s-title" style="margin-top:1rem;"><span style="font-family:'KBLJumpCondensed',sans-serif; font-weight:800; font-style:normal; display:inline-block; transform:translateY(-0.3rem); margin-right:0.3rem;">Trial Insight</span>가<br class="mobile-br"> 궁금하신가요?</h2>
+    <div class="cta-actions" style="margin-top:1.5rem;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:0.75rem; padding:2rem 3rem;">
         <p style="color:rgba(255,255,255,0.95); font-size:1.6rem; font-weight:800; margin:0 0 0.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); border-radius:10px; padding:0.5rem 1.5rem;">제품 정보 문의하기</p>
         <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
@@ -1336,7 +1576,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
         </div>
       </div>
     </div>
-    <p style="color:rgba(255,255,255,0.88); font-size:1.2rem; font-weight:400; margin-top:auto; padding-top:3rem;">제품 데모는 준비 중입니다. 문의 주시면<br class="mobile-br"> 공개 일정에 맞춰 안내드리겠습니다.</p>
+    <p style="color:rgba(255,255,255,0.88); font-size:1.2rem; font-weight:400; margin-top:auto; padding-top:1rem;">제품 데모는 준비 중입니다. 문의 주시면<br class="mobile-br"> 공개 일정에 맞춰 안내드리겠습니다.</p>
   </div>
 </section>
 
@@ -1344,7 +1584,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 <footer>
   <div class="footer-brand">
     <a href="https://www.nanumspace.com/" target="_blank" rel="noopener">
-      <img src="nanumlogo/nanum-logo.png" alt="NanumSpace" style="height:100px; width:auto; display:block; margin:0; padding:0;">
+      <img src="nanumlogo/nanum-logo.png" alt="NanumSpace" style="height:80px; width:auto; display:block; margin:0; padding:0;">
     </a>
   </div>
   <div class="footer-copy" style="line-height:1.5; margin-top:0rem;">
@@ -1392,53 +1632,344 @@ window.addEventListener('scroll', function() {
 
 <script>
 (function() {
-  const els = document.querySelectorAll('.fade-in');
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes;
+
+  function init() {
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+    nodes = [];
+    const count = Math.max(22, Math.min(Math.floor(W * H / 14000), 50));
+    for (let i = 0; i < count; i++) {
+      nodes.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        phase: Math.random() * Math.PI * 2,
+        r: 2 + Math.random() * 2.5
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const t = Date.now() * 0.001;
+    nodes.forEach(n => {
+      n.x = (n.x + n.vx + W) % W;
+      n.y = (n.y + n.vy + H) % H;
+    });
+
+    // 노드 간 연결선
+    const DIST = Math.min(W, H) * 0.28;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < DIST) {
+          ctx.strokeStyle = `rgba(75,163,222,${(1 - d / DIST) * 0.10})`;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 별 노드
+    const rScale = W < 800 ? 0.40 : W < 1000 ? 0.58 : W < 1366 ? 0.75 : 1;
+    nodes.forEach(n => {
+      const pulse = (Math.sin(t * 0.7 + n.phase) + 1) * 0.5;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, (n.r + pulse * 1.0) * rScale, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(75,163,222,${0.18 + pulse * 0.20})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(init, 200);
+  });
+  init();
+  draw();
+})();
+
+(function() {
+  const canvas = document.getElementById('geo-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+
+  const phi = (1 + Math.sqrt(5)) / 2;
+  const raw = [
+    [-1,phi,0],[1,phi,0],[-1,-phi,0],[1,-phi,0],
+    [0,-1,phi],[0,1,phi],[0,-1,-phi],[0,1,-phi],
+    [phi,0,-1],[phi,0,1],[-phi,0,-1],[-phi,0,1]
+  ];
+  const len = Math.sqrt(1 + phi * phi);
+  const verts = raw.map(function(v){ return [v[0]/len, v[1]/len, v[2]/len]; });
+  const edges = [
+    [0,1],[0,5],[0,7],[0,10],[0,11],
+    [1,5],[1,7],[1,8],[1,9],
+    [2,3],[2,4],[2,6],[2,10],[2,11],
+    [3,4],[3,6],[3,8],[3,9],
+    [4,5],[4,9],[4,11],
+    [5,9],[5,11],
+    [6,7],[6,8],[6,10],
+    [7,8],[7,10],
+    [8,9],[10,11]
+  ];
+
+  function rotY(v, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [v[0]*c + v[2]*s, v[1], -v[0]*s + v[2]*c];
+  }
+  function rotX(v, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [v[0], v[1]*c - v[2]*s, v[1]*s + v[2]*c];
+  }
+
+  function draw() {
+    var W = canvas.width, H = canvas.height;
+    var t = Date.now() * 0.00025;
+    ctx.clearRect(0, 0, W, H);
+
+    var size = Math.min(W, H) * (W < 600 ? 0.35 : 0.23);
+    var cx = W * 0.5, cy = W < 800 ? H * 0.645 : H * 0.70;
+
+    var rotated = verts.map(function(v) {
+      var r = rotY(v, t);
+      return rotX(r, t * 0.35);
+    });
+
+    var dist = 3.2;
+    var projected = rotated.map(function(v) {
+      var scale = dist / (dist + v[2]);
+      return [cx + v[0] * size * scale, cy + v[1] * size * scale, v[2]];
+    });
+
+    edges.forEach(function(e) {
+      var i = e[0], j = e[1];
+      var z = (rotated[i][2] + rotated[j][2]) / 2;
+      var alpha = 0.14 + (z + 1) * 0.10;
+      ctx.strokeStyle = 'rgba(135,210,250,' + alpha + ')';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(projected[i][0], projected[i][1]);
+      ctx.lineTo(projected[j][0], projected[j][1]);
+      ctx.stroke();
+    });
+
+    verts.forEach(function(v, i) {
+      var z = rotated[i][2];
+      var alpha = 0.22 + (z + 1) * 0.12;
+      ctx.beginPath();
+      ctx.arc(projected[i][0], projected[i][1], 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(160,225,255,' + alpha + ')';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', function() { resize(); });
+  resize();
+  draw();
+})();
+</script>
+
+<script>
+(function() {
+  var els = Array.prototype.slice.call(document.querySelectorAll('.fade-in'));
   if (!('IntersectionObserver' in window)) {
     els.forEach(function(el) { el.classList.add('vis'); });
     return;
   }
-  const obs = new IntersectionObserver(function(entries) {
+
+  // why/benefits: 섹션 단위 그룹 관찰
+  var groupedEls = [];
+  ['why', 'benefits'].forEach(function(id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    var members = Array.prototype.slice.call(sec.querySelectorAll('.fade-in'));
+    if (!members.length) return;
+    groupedEls = groupedEls.concat(members);
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        members.forEach(function(el) {
+          el.classList.toggle('vis', entry.isIntersecting);
+        });
+      });
+    }, { threshold: 0.1 }).observe(sec);
+  });
+
+  // FAQ: 콘텐츠 래퍼 직접 관찰 + JS 타이머로 순서 보장
+  var faqSec = document.getElementById('faq');
+  var faqMembers = faqSec ? Array.prototype.slice.call(faqSec.querySelectorAll('.fade-in')) : [];
+  var faqTimers = [];
+  if (faqSec && faqMembers.length) {
+    groupedEls = groupedEls.concat(faqMembers);
+    var faqDelays = faqMembers.map(function(el) {
+      return Math.round((parseFloat(el.style.transitionDelay) || 0) * 1000);
+    });
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        faqTimers.forEach(clearTimeout);
+        faqTimers = [];
+        if (entry.isIntersecting) {
+          faqMembers.forEach(function(el, i) {
+            el.classList.remove('vis');
+            faqTimers.push(setTimeout(function() { el.classList.add('vis'); }, faqDelays[i]));
+          });
+        } else {
+          faqMembers.forEach(function(el) { el.classList.remove('vis'); });
+        }
+      });
+    }, { threshold: 0.2 }).observe(faqSec);
+  }
+
+  // 나머지 fade-in 요소 개별 관찰
+  var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
-      if (entry.isIntersecting) { entry.target.classList.add('vis'); obs.unobserve(entry.target); }
+      entry.target.classList.toggle('vis', entry.isIntersecting);
     });
   }, { threshold: 0.12 });
-  els.forEach(function(el) { obs.observe(el); });
+  els.forEach(function(el) {
+    if (groupedEls.indexOf(el) === -1) { obs.observe(el); }
+  });
 })();
 
-/* ── Feature 섹션 점 네비게이션 ── */
+/* ── Feature 가로 캐러셀 (전체 폭 공통) ── */
 (function() {
-  const dotsNav = document.querySelector('.feature-dots');
   const featuresSection = document.getElementById('features');
   const blocks = ['feature1', 'feature2', 'feature3', 'feature4']
     .map(function(id) { return document.getElementById(id); })
     .filter(Boolean);
-  if (!dotsNav || !featuresSection || !blocks.length || !('IntersectionObserver' in window)) return;
+  if (!featuresSection || !blocks.length) return;
 
-  const dots = Array.prototype.slice.call(dotsNav.querySelectorAll('.feature-dot'));
-  dots.forEach(function(dot) {
-    dot.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = document.getElementById(dot.dataset.target);
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
+  const pager = document.querySelector('.feature-pager');
+  const pagerPrev = document.querySelector('.feat-pager-prev');
+  const pagerNext = document.querySelector('.feat-pager-next');
+  const pagerCurrent = document.querySelector('.feat-pager-current');
+  let currentIndex = 0;
+
+  function render() {
+    blocks.forEach(function(b, i) {
+      b.style.transform = 'translateX(' + ((i - currentIndex) * 100) + '%)';
+    });
+  }
+
+  function updatePager() {
+    if (!pagerCurrent) return;
+    pagerCurrent.textContent = String(currentIndex + 1).padStart(2, '0');
+    if (pagerPrev) pagerPrev.disabled = currentIndex === 0;
+    if (pagerNext) pagerNext.disabled = currentIndex === blocks.length - 1;
+  }
+
+  function goTo(index) {
+    const nextIndex = Math.max(0, Math.min(blocks.length - 1, index));
+    if (nextIndex === currentIndex) return;
+
+    currentIndex = nextIndex;
+    render();
+    updatePager();
+
+  }
+
+  if (pagerPrev) pagerPrev.addEventListener('click', function() { goTo(currentIndex - 1); });
+  if (pagerNext) pagerNext.addEventListener('click', function() { goTo(currentIndex + 1); });
+  window.addEventListener('resize', render);
+  blocks.forEach(function(b) { b.style.transition = 'none'; });
+  render();
+  updatePager();
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      blocks.forEach(function(b) { b.style.transition = ''; });
     });
   });
 
-  const sectionObs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      dotsNav.classList.toggle('is-visible', entry.isIntersecting);
-    });
-  }, { threshold: 0, rootMargin: '-20% 0px -20% 0px' });
-  sectionObs.observe(featuresSection);
-
-  const blockObs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (!entry.isIntersecting) return;
-      dots.forEach(function(dot) {
-        dot.classList.toggle('active', dot.dataset.target === entry.target.id);
+  if ('IntersectionObserver' in window) {
+    const sectionObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (pager) pager.classList.toggle('is-visible', entry.isIntersecting);
       });
-    });
-  }, { threshold: 0.5 });
-  blocks.forEach(function(block) { blockObs.observe(block); });
+    }, { threshold: 0, rootMargin: '-20% 0px -20% 0px' });
+    sectionObs.observe(featuresSection);
+  }
+
+  function isFeatureInView() {
+    const rect = featuresSection.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    return rect.top < viewportHeight * 0.85 && rect.bottom > viewportHeight * 0.15;
+  }
+
+  let wheelGestureActive = false;
+  let wheelDirection = 0;
+  let lastWheelMagnitude = 0;
+  let lastWheelAt = 0;
+  let wheelGestureTimer;
+  const wheelIdleMs = 100;
+  const magicMouseRenewalGapMs = 45;
+  const magicMouseRenewalRatio = 1.6;
+
+  function resetWheelGesture() {
+    clearTimeout(wheelGestureTimer);
+    wheelGestureTimer = setTimeout(function() {
+      wheelGestureActive = false;
+      wheelDirection = 0;
+      lastWheelMagnitude = 0;
+    }, wheelIdleMs);
+  }
+
+  window.addEventListener('wheel', function(e) {
+    if (!isFeatureInView()) {
+      clearTimeout(wheelGestureTimer);
+      wheelGestureActive = false;
+      wheelDirection = 0;
+      lastWheelMagnitude = 0;
+      return;
+    }
+    if (!e.deltaY) return;
+
+    const now = performance.now();
+    const direction = Math.sign(e.deltaY);
+    const magnitude = Math.abs(e.deltaY);
+    const canMove = direction > 0 ? currentIndex < blocks.length - 1 : currentIndex > 0;
+    const elapsed = now - lastWheelAt;
+    const hasFreshMagicMouseInput =
+      e.deltaMode === 0 &&
+      elapsed >= magicMouseRenewalGapMs &&
+      magnitude >= Math.max(1, lastWheelMagnitude * magicMouseRenewalRatio);
+
+    if (wheelGestureActive && wheelDirection === direction && !hasFreshMagicMouseInput) {
+      e.preventDefault();
+      lastWheelMagnitude = magnitude;
+      lastWheelAt = now;
+      resetWheelGesture();
+      return;
+    }
+
+    if (!canMove) return;
+    e.preventDefault();
+    wheelGestureActive = true;
+    wheelDirection = direction;
+    lastWheelMagnitude = magnitude;
+    lastWheelAt = now;
+    resetWheelGesture();
+    goTo(currentIndex + direction);
+  }, { passive: false });
 })();
 
 /* ── 3D Gear Icon ── */
@@ -1673,6 +2204,87 @@ window.addEventListener('scroll', function() {
     bobY = 0;
     draw(false);
   });
+})();
+
+/* ── 상단 nav 고정 스크롤 시 블러 + 라이트 섹션에서 로고 스위칭 ── */
+(function() {
+  const navEl = document.querySelector('nav');
+  const logoImg = document.querySelector('.nav-brand img');
+  const heroEl = document.getElementById('hero');
+  if (!navEl || !logoImg || !heroEl) return;
+
+  const LOGO_WHITE = 'logo/ti-logo-typo-white.png';
+  const LOGO_NAVY = 'logo/ti-logo-typo.png';
+
+  const sections = ['hero', 'why', 'features', 'benefits', 'faq', 'cta']
+    .map(function(id) { return document.getElementById(id); })
+    .filter(Boolean);
+  const themeOf = {
+    hero: 'dark', why: 'light', features: 'light',
+    benefits: 'light', faq: 'light', cta: 'dark'
+  };
+  const footerEl = document.querySelector('footer');
+  if (footerEl) { sections.push(footerEl); themeOf[footerEl.id || '__footer__'] = 'dark'; }
+
+  let isLight = false;
+  let ticking = false;
+
+  const sectionNav = document.querySelector('.section-nav');
+  const sectionNavLinks = sectionNav ? Array.prototype.slice.call(sectionNav.querySelectorAll('a')) : [];
+  let activeSectionId = null;
+
+  function update() {
+    ticking = false;
+    const scrolled = window.scrollY > (heroEl.offsetHeight - navEl.offsetHeight);
+    navEl.classList.toggle('nav-scrolled', scrolled);
+
+    const probeY = navEl.offsetHeight / 2;
+    let currentTheme = 'dark';
+    for (let i = 0; i < sections.length; i++) {
+      const r = sections[i].getBoundingClientRect();
+      if (r.top <= probeY && r.bottom > probeY) {
+        currentTheme = themeOf[sections[i].id] || (sections[i] === footerEl ? 'dark' : 'dark');
+        break;
+      }
+    }
+    const wantLight = currentTheme === 'light';
+    if (wantLight !== isLight) {
+      isLight = wantLight;
+      logoImg.src = isLight ? LOGO_NAVY : LOGO_WHITE;
+      navEl.classList.toggle('nav-light-theme', isLight);
+    }
+
+    if (sectionNav) {
+      const midY = window.innerHeight / 2;
+      let midTheme = 'dark';
+      let midId = null;
+      for (let i = 0; i < sections.length; i++) {
+        const r = sections[i].getBoundingClientRect();
+        if (r.top <= midY && r.bottom > midY) {
+          midId = (sections[i] === footerEl) ? 'cta' : sections[i].id;
+          midTheme = themeOf[sections[i].id] || 'dark';
+          break;
+        }
+      }
+      if (midId !== activeSectionId) {
+        activeSectionId = midId;
+        sectionNavLinks.forEach(function(a) {
+          a.classList.toggle('active', a.getAttribute('data-section') === midId);
+        });
+      }
+      sectionNav.classList.toggle('section-nav-light', midTheme === 'light');
+      sectionNav.classList.toggle('section-nav-blue', midId === 'cta');
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 })();
 </script>
 </body>
