@@ -11,30 +11,6 @@
     document.documentElement.classList.add('js');
   }
 </script>
-<script>
-  /*
-   * Mac 100%와 Windows 75%가 같은 시각 크기인 환경을 보정한다.
-   * window.outerWidth / innerWidth는 OS 화면 배율과 분리해 브라우저 확대율을
-   * 판별하므로, Windows 브라우저가 100%일 때만 페이지를 75% 기준으로 표시한다.
-   */
-  (function() {
-    var root = document.documentElement;
-    var isWindowsChromium = /Windows/i.test(navigator.userAgent) && /(?:Edg|Chrome|Chromium)/i.test(navigator.userAgent);
-
-    function updateWindowsScale() {
-      var browserScale = window.outerWidth && window.innerWidth
-        ? window.outerWidth / window.innerWidth
-        : 1;
-      var isDesktop = window.innerWidth > 800;
-      var isDefaultBrowserZoom = Math.abs(browserScale - 1) < 0.06;
-      root.classList.toggle('windows-default-zoom', isWindowsChromium && isDesktop && isDefaultBrowserZoom);
-    }
-
-    updateWindowsScale();
-    window.addEventListener('resize', updateWindowsScale);
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', updateWindowsScale);
-  })();
-</script>
 <meta name="description" content="임상연구 모니터링의 복잡함을 자동화로 해결하는 특화 플랫폼, Trial Insight">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://minjilee0625-prog.github.io/trial-insight-landingpage/">
@@ -84,7 +60,8 @@ html { scrollbar-color: #A8BCC8 transparent; scrollbar-width: thin; }
 html {
   scroll-behavior: smooth;
   background: #080f1e;
-  scroll-snap-type: y mandatory;
+  /* Windows의 휠 입력을 막지 않도록 부드러운 스냅만 사용한다. */
+  scroll-snap-type: y proximity;
 }
 .hero, .why-section, .features-section, .benefits-section, #faq, .cta-footer-wrap {
   scroll-snap-stop: always;
@@ -96,16 +73,6 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-}
-
-/* Windows 100%를 Mac 100% / Windows 75%와 같은 시각 크기로 보정 */
-@media (min-width: 801px) {
-  @supports (zoom: 1) {
-    html.windows-default-zoom body {
-      zoom: 0.75;
-      width: 133.333333%;
-    }
-  }
 }
 
 /* ─── NAV ─────────────────────────────────── */
@@ -153,7 +120,7 @@ nav.nav-light-theme .nav-links a:active { background: rgba(31,104,176,0.14); }
 
 /* ─── HERO ─────────────────────────────────── */
 .hero {
-  position: relative; height: 100vh;
+  position: relative; height: 100vh; height: 100dvh;
   display: flex; align-items: center;
   overflow: hidden;
   background: linear-gradient(to bottom, #080f1e 0%, #112147 30%, #2d5f8a 100%);
@@ -388,7 +355,7 @@ nav.nav-light-theme .nav-links a:active { background: rgba(31,104,176,0.14); }
   background: radial-gradient(ellipse 100% 15% at 50% 0%, rgba(0,185,255,0.12) 0%, transparent 100%), linear-gradient(145deg, #EBF4FF 0%, #F6FAFF 55%, #FAFCFF 100%);
   text-align: center; position: relative; overflow: hidden;
   box-sizing: border-box;
-  min-height: 100vh; padding-top: 80px; display: flex; flex-direction: column; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; padding-top: 80px; display: flex; flex-direction: column; justify-content: center;
   scroll-snap-align: start;
 }
 .why-section::before, .why-section::after { display: none; }
@@ -440,7 +407,7 @@ nav.nav-light-theme .nav-links a:active { background: rgba(31,104,176,0.14); }
 .benefits-section {
   background: #FFFFFF;
   text-align: left; position: relative; overflow: hidden;
-  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
   scroll-snap-align: start;
 }
 .benefits-section::before, .benefits-section::after { display: none; }
@@ -481,7 +448,7 @@ nav.nav-light-theme .nav-links a:active { background: rgba(31,104,176,0.14); }
   background: linear-gradient(165deg, #E9EFF8 0%, #F2F7FC 55%, #F9FAFB 100%);
   position: relative;
   overflow: hidden;
-  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
   box-sizing: border-box;
   scroll-snap-align: start;
 }
@@ -1553,7 +1520,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 
 <!-- CTA + FOOTER WRAPPER -->
 <!-- FAQ -->
-<section id="faq" style="background:linear-gradient(160deg,#EBF4FF 0%,#F6FAFF 55%,#FAFCFF 100%); padding:5rem 1.5rem; padding-top:calc(5rem + 80px); position:relative; overflow:hidden; scroll-snap-align:start; min-height:100vh; display:flex; flex-direction:column; justify-content:center; box-sizing:border-box;">
+<section id="faq" style="background:linear-gradient(160deg,#EBF4FF 0%,#F6FAFF 55%,#FAFCFF 100%); padding:5rem 1.5rem; padding-top:calc(5rem + 80px); position:relative; overflow:hidden; scroll-snap-align:start; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; justify-content:center; box-sizing:border-box;">
   <img src="icons/icon-search-3d.png" alt="" aria-hidden="true" style="position:absolute; width:300px; height:auto; left:50%; top:8rem; transform:translateX(calc(-50% + 0.7rem)) translateY(0rem); opacity:0.5; pointer-events:none; z-index:0; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%); mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%);">
 
   <div style="width:100%; max-width:800px; margin:0 auto; position:relative; z-index:1; box-sizing:border-box;">
@@ -1607,7 +1574,7 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
   </div>
 </section>
 
-<div class="cta-footer-wrap" style="min-height:100vh; display:flex; flex-direction:column; scroll-snap-align:start;">
+<div class="cta-footer-wrap" style="min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; scroll-snap-align:start;">
 
 <!-- CTA -->
 <section class="cta-section" id="cta" style="flex:1; min-height:0; position:relative; overflow:hidden; padding-top:80px; box-sizing:border-box;">
