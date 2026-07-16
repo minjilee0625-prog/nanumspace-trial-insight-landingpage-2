@@ -6,8 +6,8 @@
 <link rel="icon" type="image/png" href="logo/favicon-ti.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
-  /* 지원되는 환경에서만 스크롤 진입 모션을 활성화한다. */
-  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  /* OS의 "동작 줄이기" 설정과 무관하게 항상 스크롤 진입 모션을 활성화한다. */
+  if ('IntersectionObserver' in window) {
     document.documentElement.classList.add('js');
   }
 </script>
@@ -1006,12 +1006,6 @@ nav.nav-light-theme .nav-hamburger span { background: #1F3A5F; }
   .nav-hamburger { display: flex; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  .fade-in, .js .fade-in { opacity: 1; transform: none; }
-  html { scroll-snap-type: none; }
-}
-
 /* 데스크탑 전용 */
 @media (min-width: 801px) {
   .features-header { padding-top: 20px !important; }
@@ -1642,7 +1636,6 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
 
 <script>
 (function() {
-  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var rafId = null;
 
   function ease(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
@@ -1652,7 +1645,6 @@ html body .feat-visual.feat-icon-pair { flex-direction: row !important; justify-
     var startY = window.pageYOffset;
     if (Math.abs(targetY - startY) < 2) return;
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    if (reducedMotion.matches) { window.scrollTo(0, targetY); return; }
     html.style.scrollSnapType = 'none';
     html.style.scrollBehavior = 'auto';
     window._tiScrolling = true;
@@ -1986,7 +1978,6 @@ window.addEventListener('scroll', function() {
   var wheelRemainder = 0;
   var wheelResetTimer = null;
   var desktopCarousel = window.matchMedia('(min-width: 1001px)');
-  var reducedMotionFeat = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function normalizedWheelDelta(event) {
     var delta = event.deltaY;
@@ -2001,7 +1992,7 @@ window.addEventListener('scroll', function() {
 
   document.addEventListener('wheel', function(e) {
     var rect = featuresSection.getBoundingClientRect();
-    if (!desktopCarousel.matches || reducedMotionFeat.matches) return;
+    if (!desktopCarousel.matches) return;
     if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
     if (Math.abs(rect.top) > Math.max(150, window.innerHeight * 0.25)) return;
     /* busy 또는 섹션 이동 중이면 차단만 하고 wheelRemainder는 쌓지 않음
